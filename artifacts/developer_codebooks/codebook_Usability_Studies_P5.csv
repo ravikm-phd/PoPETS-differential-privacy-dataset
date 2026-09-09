@@ -1,0 +1,121 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+LackOfKnowledge,I've heard of differential privacy but never actually used it,Session Start,Developer lacks practical DP experience that libraries assume
+MethodicalApproach,Let me first check what libraries I need to install and understand the dataset structure,Initial Setup,Developer takes systematic approach to task
+DataExploration,Let me check the dataset first to understand what I'm working with,Initial Setup,Developer needs to understand data before applying DP
+DatasetIssue,"Hmm, no headers",Initial Setup,Dataset format creates initial friction
+DataExploration,Let me check how many people have income >50K to understand what I'm working with,Initial Setup,Developer establishes baseline for verification
+InstallationSuccess,"Good, that installed successfully",Task 1 - IBM DiffPrivLib ,Smooth installation for IBM DiffPrivLib
+DocumentationSearch,Now let me check the documentation,Task 1 - IBM DiffPrivLib ,Developer's first instinct is to consult documentation
+APIDiscoverability,Let me see what functions are available for counting,Task 1 - IBM DiffPrivLib ,Developer explores API to find needed functionality
+ExampleCode,I see there's a count function mentioned. Let me try using it,Task 1 - IBM DiffPrivLib ,Developer seeks examples to guide usage
+HowShouldIUseThis,"Wait, how do I use this?",Task 1 - IBM DiffPrivLib ,Developer uncertain about function usage
+MissingDocumentation,"The documentation says count(array, epsilon=...) but I need to count rows that match a condition",Task 1 - IBM DiffPrivLib ,Documentation doesn't cover common use case
+HowShouldIUseThis,"Actually, I think I need to filter the data first, then count the length, and apply DP to that count?",Task 1 - IBM DiffPrivLib ,Developer uncertain about correct approach
+HowShouldIUseThis,Or can I pass a boolean array?,Task 1 - IBM DiffPrivLib ,Developer explores alternative input types
+ClarityOfDocumentation,"Hmm, the documentation isn't super clear",Task 1 - IBM DiffPrivLib ,Documentation lacks clarity
+MissingDocumentation,It says 'count' but doesn't show a clear example of counting filtered rows,Task 1 - IBM DiffPrivLib ,Missing example for common use case
+APIDiscoverability,Let me check if count is even the right function. Maybe I should use mechanisms directly?,Task 1 - IBM DiffPrivLib ,Developer uncertain which API layer to use
+APIExploration,Let me look at what's available,Task 1 - IBM DiffPrivLib ,Developer explores available functions
+SensitivityKnowledge,"For counting, if I add or remove one row, the count changes by at most 1, so sensitivity should be 1",Task 1 - IBM DiffPrivLib ,Developer applies theoretical DP knowledge
+WorkaroundRequired,Let me try using the Laplace mechanism directly,Task 1 - IBM DiffPrivLib ,Developer resorts to lower-level API
+PrivacyParameterConfiguration,epsilon = 1.0; sensitivity = 1.0,Task 1 - IBM DiffPrivLib ,Developer configures privacy parameters manually
+ImplementationSuccess,"Okay! That seems to work. I got a result of 7840 (close to the actual 7841, which makes sense with noise)",Task 1 - IBM DiffPrivLib ,Workaround produces correct results
+ConfidenceUncertainty,But I'm not 100% sure if this is the right way,Task 1 - IBM DiffPrivLib ,Developer lacks confidence in solution
+WorkaroundRequired,"The library has a tools.count function, so maybe there's a better way?",Task 1 - IBM DiffPrivLib ,Developer suspects workaround isn't intended usage
+APIInvestigation,Let me check what tools.count actually does,Task 1 - IBM DiffPrivLib ,Developer investigates alternative function
+ClarityOfDocumentation,"Hmm, it seems like count is meant for counting elements in an array, not for differentially private counting of a single value",Task 1 - IBM DiffPrivLib ,Function purpose differs from expectation
+WorkaroundRequired,But I feel like I'm working around the library rather than using it as intended,Task 1 - IBM DiffPrivLib ,Developer recognizes workaround
+MissingDocumentation,The documentation should make this clearer - when to use tools vs mechanisms directly,Task 1 - IBM DiffPrivLib ,Documentation doesn't explain API design
+ConfidenceUncertainty,"Moderately confident. It works, but I had to figure it out myself rather than following clear documentation",Task 1 - IBM DiffPrivLib ,Lack of guidance reduces confidence
+LearningCurveTooSteep,The library seems to assume I already know when to use which API,Task 1 - IBM DiffPrivLib ,Library assumes prior knowledge
+LibraryExpectation,Maybe this library will be clearer,Task 1 - PyDP,Developer hopes for better experience
+BuildIssues,"ImportError: dlopen(.../pydp/pydp.so, 0x0002): tried: '...' (slice is not valid mach-o file)",Task 1 - PyDP,Binary compatibility error
+FrustrationExpressed,This is a compatibility issue! The binary extension isn't compatible with my system. This is really frustrating,Task 1 - PyDP,Installation failure causes frustration
+BuildIssues,I can't even get started with this library,Task 1 - PyDP,Installation blocks all progress
+InstallationRetry,"Let me try uninstalling and reinstalling, or maybe there's a different package name?",Task 1 - PyDP,Developer attempts recovery
+DependencyIssues,That's trying to install a lot of dependencies and some are failing to build,Task 1 - PyDP,Complex dependencies cause failures
+DependencyIssues,This is taking forever and hitting errors with dlib and other dependencies,Task 1 - PyDP,Specific dependency (dlib) fails
+TimeWasted,I'm spending way too much time just trying to install this library,Task 1 - PyDP,Installation consumes excessive time
+BuildIssues,"This is a major usability issue - if I can't even install it, how can I use it?",Task 1 - PyDP,Installation is critical barrier
+Disappointment,This is really disappointing. I was hoping PyDP would be easier to use,Task 1 - PyDP,Expectations unmet
+LibraryAbandonment,Let me move on to OpenDP,Task 1 - PyDP,Developer abandons library due to issues
+InstallationSuccess,"Good, that installed successfully",Task 1 - OpenDP,OpenDP installs without issues
+DocumentationComplexity,"Wow, this documentation looks very different. It seems more... theoretical?",Task 1 - OpenDP,Documentation style is unfamiliar
+AbstractConcepts,It talks about 'transformations' and 'measurements' and 'domains'. This is quite abstract,Task 1 - OpenDP,Abstract terminology creates barrier
+DocumentationSearch,Let me look for a counting example,Task 1 - OpenDP,Developer seeks practical examples
+FunctionalProgrammingStyle,I see references to make_count() function. But the way it's used is very different - you chain operations with >>,Task 1 - OpenDP,Unfamiliar programming paradigm
+FunctionalProgrammingStyle,This is like functional programming,Task 1 - OpenDP,Developer identifies paradigm
+APIDiscoverability,"Empty list. Hmm, maybe I need to enable some features?",Task 1 - OpenDP,Features hidden by default
+FeatureEnabling,Ah! I need to enable 'contrib' features,Task 1 - OpenDP,Required feature flags add complexity
+NestedModuleStructure,"So it's dp.t.make_count, not dp.make_count. This is confusing - why is it nested like this?",Task 1 - OpenDP,Nested modules are non-intuitive
+APIChaining,So I need to chain the transformation with a measurement,Task 1 - OpenDP,Developer learns chaining pattern
+WrongResults,"It runs! But wait... the result is 32562, which is almost the total number of rows. That can't be right",Task 1 - OpenDP,Unexpected results
+MentalModelMismatch,"I'm counting all elements, not just the ones that are 1!",Task 1 - OpenDP,API behavior doesn't match expectation
+WrongResults,"Wait, that's also wrong! It should be 3, not 0. Something is definitely wrong with my understanding",Task 1 - OpenDP,Test case confirms misunderstanding
+ClarityOfDocumentation,The documentation doesn't clearly explain what make_count counts,Task 1 - OpenDP,Function behavior unclear
+HowShouldIUseThis,Does it count all elements? Non-zero elements? I'm really confused,Task 1 - OpenDP,Developer cannot determine behavior
+ClarityOfDocumentation,"It says 'computes a count of the number of records in data.' So it counts all records, not filtered ones",Task 1 - OpenDP,Function counts differently than expected
+MentalModelMismatch,But then how do I count only the ones matching my condition?,Task 1 - OpenDP,Use case not supported by obvious API
+PrivacyConcern,"Maybe I need to filter the data first and only pass the matching rows? But that would expose the actual data, which defeats the purpose of DP",Task 1 - OpenDP,Developer recognizes privacy implications
+FrustrationExpressed,I'm really struggling here. The API doesn't match my mental model,Task 1 - OpenDP,Frustration from mismatch
+MentalModelMismatch,"I expected to be able to say 'count the rows where income >50K' but instead I have to understand transformations, measurements, domains",Task 1 - OpenDP,Expectations differ from reality
+LearningCurveTooSteep,"I have to understand transformations, measurements, domains, and the functional programming style",Task 1 - OpenDP,Multiple concepts required
+ExampleCode,More concrete examples! Show me: 'Here's how you count rows that match a condition' with the actual code,Task 1 - OpenDP,Requests practical examples
+ExampleCode,"I understand the math conceptually, but translating it to code is difficult",Task 1 - OpenDP,Gap between theory and implementation
+TaskDeferral,"For now, let me move on to Task 2 and come back to this",Task 1 - OpenDP,Developer defers difficult task
+APIDiscoverability,I see there's a mean() function in diffprivlib.tools,Task 2 - IBM DiffPrivLib,Developer finds needed function
+ParameterDiscovery,"It says mean(array, epsilon=..., bounds=...). The bounds are important",Task 2 - IBM DiffPrivLib,Developer learns parameter requirements
+BoundsConfiguration,Let me check the actual min/max in the data first,Task 2 - IBM DiffPrivLib,Developer investigates data for bounds
+BoundsConfiguration,"It shows 17 and 90. So I could use (17, 90) or be more conservative with (0, 100)",Task 2 - IBM DiffPrivLib,Developer considers bounds tradeoffs
+BoundsConfiguration,"I'll use (0, 100) to be safe, though it might add more noise than necessary",Task 2 - IBM DiffPrivLib,Conservative bounds choice
+ImplementationSuccess,Good! This worked much better than the count function,Task 2 - IBM DiffPrivLib,Mean function easier to use
+ClarityOfDocumentation,"The API is clearer for mean - I pass the data array, epsilon, and bounds",Task 2 - IBM DiffPrivLib,API clarity appreciated
+ImplementationSuccess,"Perfect! I got results like: Bachelors: 38.91, HS-grad: 38.99, Masters: 44.26",Task 2 - IBM DiffPrivLib,Successful results
+PositiveFeedback,This task was much easier with IBM DiffPrivLib than Task 1. The mean() function is straightforward and well-documented,Task 2 - IBM DiffPrivLib,Positive experience with mean
+APIConsistency,"The API is consistent - I pass data, epsilon, and bounds. It's intuitive",Task 2 - IBM DiffPrivLib,Consistent API praised
+APIInconsistency,I wish the count function worked the same way,Task 2 - IBM DiffPrivLib,Inconsistency between functions noted
+BuildIssues,I couldn't even install PyDP due to the compatibility issue,Task 2 - PyDP,Installation failure persists
+FrustrationExpressed,This is really disappointing. I can't complete the full study because one of the libraries won't install,Task 2 - PyDP,Unable to test library
+BuildIssues,This is a major usability issue - installation should just work,Task 2 - PyDP,Installation expected to be seamless
+NegativeAnticipation,I'm dreading this a bit after my experience with Task 1,Task 2 - OpenDP,Prior experience creates apprehension
+APIDiscoverability,I see make_mean() in dp.t,Task 2 - OpenDP,Developer finds relevant function
+ErrorMessagesUnhelpful,Error: 'dataset size must be known. Either specify size in the input domain or use make_resize',Task 2 - OpenDP,Error lacks actionable guidance
+ErrorMessagesUnhelpful,"Again, the error message tells me what's wrong but not clearly how to fix it",Task 2 - OpenDP,Errors don't guide solution
+ErrorMessagesUnhelpful,"It says I can specify size in the domain or use make_resize, but doesn't show how",Task 2 - OpenDP,Alternatives mentioned without examples
+DomainSpecification,Let me try specifying the size in the domain,Task 2 - OpenDP,Developer attempts resolution
+ImplementationSuccess,Good! That worked,Task 2 - OpenDP,Developer resolves issue
+SensitivityCalculation,"For mean, the sensitivity is (upper_bound - lower_bound) / n, so scale = (upper_bound - lower_bound) / (n * epsilon)",Task 2 - OpenDP,Manual sensitivity calculation required
+ImplementationSuccess,Excellent! This worked. I got results similar to IBM DiffPrivLib,Task 2 - OpenDP,Successful implementation
+LearningFromErrors,"This was actually easier than Task 1 with OpenDP. Once I understood that I needed to specify the size in the domain, it made sense",Task 2 - OpenDP,Developer learned from prior struggle
+LearningFromErrors,"But I had to figure that out from an error message, not from documentation",Task 2 - OpenDP,Learning came from errors not docs
+APIComparison,"IBM DiffPrivLib was simpler - just mean(ages, epsilon=..., bounds=...)",Task 2 - OpenDP,Simpler alternative exists
+LearningCurveTooSteep,"OpenDP required me to understand domains, transformations, measurements, and sensitivity calculations",Task 2 - OpenDP,Multiple concepts required
+APIComparison,"It's more powerful and flexible, but also more complex",Task 2 - OpenDP,Power vs simplicity tradeoff
+PositiveFeedback,Simple API for common operations like mean. Installation was smooth. The mean() function is intuitive,Final Reflection - IBM DiffPrivLib,Developer praises IBM strengths
+APIInconsistency,The count() function was confusing for filtered data,Final Reflection - IBM DiffPrivLib,Count function problematic
+WorkaroundRequired,"I had to use mechanisms directly, which felt like a workaround",Final Reflection - IBM DiffPrivLib,Workaround acknowledged
+MissingDocumentation,Documentation lacks examples for common use cases like counting filtered rows,Final Reflection - IBM DiffPrivLib,Documentation gaps noted
+BuildIssues,Major installation compatibility issue. The binary extension wasn't compatible with my system,Final Reflection - PyDP,Critical installation failure
+BuildIssues,Tried alternative installation methods but hit dependency build failures,Final Reflection - PyDP,Multiple installation attempts failed
+BuildIssues,"This is a critical usability issue - if I can't install it, I can't use it",Final Reflection - PyDP,Installation is dealbreaker
+PositiveFeedback,Very flexible and powerful. The functional approach allows for complex compositions,Final Reflection - OpenDP,Developer recognizes OpenDP strengths
+LearningCurveTooSteep,"Very steep learning curve. Requires deep understanding of DP theory (domains, metrics, transformations, measurements, sensitivity)",Final Reflection - OpenDP,Steep learning curve
+ErrorMessagesUnhelpful,Error messages aren't helpful - they tell you what's wrong but not how to fix it,Final Reflection - OpenDP,Poor error messages
+ClarityOfDocumentation,"Documentation is too abstract - needs more concrete, copy-paste examples",Final Reflection - OpenDP,Abstract documentation criticized
+NestedModuleStructure,"The nested module structure (dp.t, dp.m) is confusing at first",Final Reflection - OpenDP,Module structure confusing
+MentalModelMismatch,I got wrong results for counting because the API didn't match my mental model,Final Reflection - OpenDP,Mental model mismatch caused errors
+ExampleCode,"Better examples: Show real-world scenarios like 'count rows matching condition' or 'compute mean by group' with complete, working code",Final Recommendations,Requests real-world examples
+ClarityOfDocumentation,"Clearer documentation: Explain not just what functions do, but when to use them, common patterns, and the mental model behind the API design",Final Recommendations,Documentation improvement needed
+ErrorMessagesUnhelpful,"Better error messages: Especially for OpenDP - tell me what type is expected, show an example of correct usage",Final Recommendations,Error message improvement needed
+BuildIssues,"Installation reliability: PyDP should work out of the box. If there are system-specific requirements, document them clearly",Final Recommendations,Installation must be reliable
+HighLevelAPINeeded,"Common use case helpers: For things like 'count filtered rows' or 'group by and aggregate', provide high-level functions",Final Recommendations,High-level functions requested
+HighLevelAPINeeded,Not everyone needs the full flexibility of OpenDP's transformations,Final Recommendations,Simpler APIs for common cases
+GettingStartedGuide,"Getting started guides: Step-by-step tutorials that build from simple to complex, not just API reference",Final Recommendations,Tutorials needed
+GettingStartedGuide,Show me the 'happy path' first,Final Recommendations,Clear starting point needed
+APIInconsistency,"API consistency: Within a library, similar operations should work similarly. IBM's mean() is great, but count() works differently",Final Recommendations,Consistency improvement needed
+OverallAssessment,"IBM DiffPrivLib was the most approachable for someone new to DP, at least for the operations that worked well",Final Summary,IBM rated most approachable
+LearningCurveTooSteep,All three libraries assume you already understand differential privacy well,Final Summary,All libraries assume knowledge
+LearningCurveTooSteep,"As a Python developer who's new to DP, I needed more hand-holding",Final Summary,More guidance needed
+OverallAssessment,"The libraries are powerful, but the barrier to entry is high",Final Summary,High barrier to entry
+BuildIssues,The installation issue with PyDP is a deal-breaker,Final Summary,Installation critical
+LibraryAbandonment,"In a real project, I wouldn't have time to debug installation problems. I'd just use a different library",Final Summary,Poor usability leads to abandonment

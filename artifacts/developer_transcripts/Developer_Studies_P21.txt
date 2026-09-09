@@ -1,0 +1,71 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P21 (Software Developer, India, 6 Py. Yrs, 3 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P21: No questions, the instructions are straightforward. I can start now.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P21: I am a Software Developer at a product company in India. I have about 6 years of Python experience, mostly for backend automation and data scripting, and about 3 years of data engineering experience.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with IBM DiffPrivLib, PyDP, or OpenDP specifically?
+
+P21: I am a novice with Differential Privacy. I understand the basic goal of protecting individual privacy by adding noise, but I haven't built differential privacy pipelines using these Python libraries before.
+
+Ravi Mahankali: Excellent. What does your typical development environment look like?
+
+P21: VS Code and Jupyter notebooks on Linux/macOS, using pandas and NumPy.
+
+Ravi Mahankali: Perfect. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with total budget epsilon equal to 1.0. You are expected to complete this task using all three libraries in the designated order: IBM DiffPrivLib first, then PyDP, then OpenDP. The dataset is loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P21: Okay, starting Task A with IBM DiffPrivLib. Let me load `adult.csv` in pandas first.
+
+P21: Non-private count of `income > 50K` is 7841. Now I'll search the IBM DiffPrivLib documentation for a counting function.
+
+P21: There's no direct 'count' function, but I see 'count_nonzero' and 'sum'.
+
+P21: Let me try `count_nonzero` on the boolean mask for `income > 50K`.
+
+P21: TypeError: `count_nonzero()` got an unexpected keyword argument 'epsilon'. That's unexpected. So `count_nonzero` doesn't take `epsilon` directly. Let me try `sum` on the integer indicator column. But `sum` requires upper and lower bounds parameters, which feels unnecessary for counting binary flags.
+
+P21: Since high-level tools like `count_nonzero` and `sum` didn't work for a simple filtered count on the first attempt, I'll drop down to the `Laplace` mechanism directly as a workaround.
+
+P21: True count of `income > 50K` is 7841. Sensitivity for a single count query is 1.
+
+P21: DiffPrivLib returned 7837. Instantiating the Laplace mechanism directly worked, but it feels like a manual workaround because the high-level tools API was confusing for a basic count.
+
+P21: Now moving to PyDP for Task A. Let's check `pydp.algorithms.laplacian.Count`.
+
+P21: PyDP returned 7840. That executed cleanly after converting the boolean mask to an integer list.
+
+P21: Now testing OpenDP for Task A.
+
+P21: OpenDP returned 7844. Once I specified vector domain types `atom_domain(T=int)` and chained `make_count` with `make_laplace`, it ran correctly.
+
+Ravi Mahankali: Great progress. Now let's move to Task B. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work.
+
+P21: Task B involves grouped aggregation across 16 unique education categories in `adult.csv`.
+
+P21: First, regarding budget composition: under sequential composition, if I split total budget `epsilon = 1.0` sequentially across 16 queries, each group query gets `1.0 / 16 = 0.0625`.
+
+P21: Testing this sequential split in DiffPrivLib with bounds `(17, 90)`... Small groups like 'Preschool' or 'Doctorate' get wild noise numbers (e.g. 214.7 or -19.3). The noise overwhelms the signal.
+
+P21: If I assume parallel composition holds because education categories form disjoint partitions of the dataset, passing `epsilon=1.0` per group gives accurate averages ('Bachelors' 38.2, 'Masters' 40.7, 'Doctorate' 44.1). However, none of the three libraries provide native DataFrame GroupBy integration that verifies disjointness or tracks parallel composition automatically.
+
+Ravi Mahankali: Thank you — that completes the coding tasks. A few closing debrief questions. Which library did you find most usable, and why?
+
+P21: PyDP was the most straightforward for single aggregate queries. DiffPrivLib's low-level mechanism API was flexible, but its high-level `tools` module was confusing due to missing count helpers. OpenDP has a steep learning curve due to strict type declarations.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P21: Finding the right high-level function for simple counts in DiffPrivLib, and the complete lack of native DataFrame GroupBy helpers for grouped aggregations.
+
+Ravi Mahankali: What would you recommend to maintainers of DP libraries?
+
+P21: Add an explicit `count` helper to high-level tool modules, build native DataFrame GroupBy helpers with automatic parallel composition tracking, and improve error messages for type mismatches.
+
+Ravi Mahankali: Thank you very much for your time and feedback.

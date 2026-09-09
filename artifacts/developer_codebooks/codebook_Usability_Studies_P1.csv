@@ -1,0 +1,65 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+LackOfKnowledge,"This is the first time I've done a project like that, so no",Survey - 00:00,No prior DP experience
+LackOfKnowledge,"I've read the little briefing that we have here, but that is where my knowledge ends",Survey - 00:00,Limited DP knowledge
+LearningConfidence,I should be fine picking them up quite quickly,Survey - 00:00,Confident about learning new tools
+ExampleCode,It doesn't point to a documentation website... It does have examples which is the first thing I'm going to go to,PyDP,Looking for examples first
+ExampleCodeGap,It's given me a bit of information... for the first class I feel the carrots demo is quite usable,PyDP,Finding relevant example
+ExampleCodeComplexity,"They made a whole class and that's really cool, but it's so much more complicated than what I need",PyDP,Examples too complex
+ExampleCodeGap,"It would be nice to have an example that is slightly more complicated than the baseline, but is slightly less complicated than this full class implementation",PyDP,Missing intermediate examples
+ExampleCodeGap,"The baseline example in their repository is real simple and the first line, but then the full example jumps to a complete class structure. There's no middle ground",PyDP,Gap between simple and complex examples
+EcosystemIntegration,"OK, so this doesn't have the ability to directly read CSVs, so I'm going to have to use another tool",PyDP,No CSV reading capability
+DataFormatIssue,I can't see the column names,PyDP,Dataset issues
+DataFormatIssue,"After the comma for the income, there is a space between comma and less than",PyDP,Data format nuance
+DataFormatIssue,I would have spent a while like trying to notice that,PyDP,Subtle data issues
+DocumentationStructure,"If there was documentation, could I feel like the documentation just sent me into example codes? Maybe I'm just looking in the wrong place",PyDP,Documentation navigation issues
+PrivacyParameterConfiguration,"Now the privacy budget. So I mean, am I allowed to put any value for that?",PyDP,Uncertainty about epsilon
+PrivacyParameterConfiguration,"It says typical values include 0.1 for strong privacy, 1.0 for standard privacy. So I guess I'll put a one as I don't really understand",PyDP,Using default without understanding
+PrivacyParameterConfiguration,Delta is privacy failure possibility. I mean zero seems like an interesting number,PyDP,Uncertain about delta parameter
+BoundsConfiguration,In the example they've just done zero to 100. And in their data they have 180 things I'm not too sure what's going on there,PyDP,Confusion about bounds
+ErrorMessagesUnhelpful,The error message isn't very clear. It says something about the data format but doesn't tell me exactly what's wrong or how to fix it,PyDP,Unhelpful error message
+FrustrationExpressed,This is frustrating - I'm not sure what the library expects,PyDP,Frustration from unclear errors
+DocumentationSearch,Let me try a different approach. Maybe I need to understand how PyDP expects the data to be formatted. The documentation doesn't clearly explain this,PyDP,Documentation gaps
+LibrarySwitch,"OK, let me try IBM DiffPrivLib instead. Maybe it will be clearer",IBM DiffPrivLib,Switching libraries
+HowShouldIUseThis,"Wait, how do I use this? The documentation says count(array, epsilon=...) but I need to count rows that match a condition",IBM DiffPrivLib,Unclear function usage
+HowShouldIUseThis,"I think I need to filter the data first, then count the length, and apply DP to that count? Or can I pass a boolean array?",IBM DiffPrivLib,Multiple possible approaches
+ClarityOfDocumentation,The documentation isn't super clear. It says 'count' but doesn't show a clear example of counting filtered rows,IBM DiffPrivLib,Missing use case example
+WorkaroundRequired,Maybe I should use mechanisms directly? Let me look at what's available,IBM DiffPrivLib,Resorting to lower-level API
+SensitivityKnowledge,"For counting, if I add or remove one row, the count changes by at most 1, so sensitivity should be 1",IBM DiffPrivLib,Applying DP theory knowledge
+WorkaroundRequired,But I feel like I'm working around the library rather than using it as intended,IBM DiffPrivLib,Workaround feels wrong
+MissingDocumentation,The documentation should make this clearer - when to use tools vs mechanisms directly,IBM DiffPrivLib,Missing API guidance
+ConfidenceUncertainty,But I'm still not confident this is the 'right' way to do it according to the library's design,IBM DiffPrivLib,Uncertainty about correctness
+DocumentationComplexity,"Wow, this documentation looks very different. It seems more... theoretical?",OpenDP,Abstract documentation
+AbstractConcepts,It talks about 'transformations' and 'measurements' and 'domains'. This is quite abstract compared to the other libraries,OpenDP,Unfamiliar terminology
+AbstractConcepts,I'm not sure how to translate this into actual code for my task,OpenDP,Theory-to-code gap
+FunctionalProgrammingStyle,The way it's used is very different - you chain operations with >>. This is like functional programming,OpenDP,Unfamiliar paradigm
+ClarityOfDocumentation,The documentation doesn't clearly explain what make_count counts. Does it count all elements? Non-zero elements?,OpenDP,Function behavior unclear
+MentalModelMismatch,"It says 'computes a count of the number of records in data.' So it counts all records, not filtered ones",OpenDP,Expectation mismatch
+MentalModelMismatch,But then how do I count only the ones matching my condition?,OpenDP,Use case not supported
+PrivacyConcern,Maybe I need to filter the data first and only pass the matching rows? But that would expose the actual data,OpenDP,Privacy concern about filtering
+WrongResults,"It runs! But wait... the result is 32562, which is almost the total number of rows. That can't be right",OpenDP,Unexpected results
+WrongResults,"Wait, that's also wrong! It should be 3, not 0. Something is definitely wrong with my understanding",OpenDP,Test case fails
+ConfusionExpressed,The documentation doesn't clearly explain what make_count counts. Does it count all elements? Non-zero elements? I'm really confused,OpenDP,Deep confusion
+LearningFromErrors,"OK, I think I understand now. make_count counts non-zero elements in the input vector",OpenDP,Learning through experimentation
+LearningCurveTooSteep,"This is way more complex than I expected. I had to understand transformations, measurements, domains, and the functional programming style",OpenDP,Steep learning curve
+APIComparison,"The mean() function is straightforward and well-documented. The API is consistent - I pass data, epsilon, and bounds. It's intuitive",IBM DiffPrivLib,Positive feedback on mean
+BoundsConfiguration,The bounds are important - I need to specify the min and max possible values for age,IBM DiffPrivLib,Understanding bounds requirement
+BoundsConfiguration,"I could use (17, 90) or be more conservative with (0, 100). I'll use (0, 100) to be safe, though it might add more noise",IBM DiffPrivLib,Bounds tradeoff decision
+ImplementationSuccess,This task was much easier with IBM DiffPrivLib than Task 1,IBM DiffPrivLib,Easier experience
+APIConsistency,I wish the count function worked the same way,IBM DiffPrivLib,Inconsistency noted
+ErrorMessagesUnhelpful,The error message tells me what's wrong but not clearly how to fix it,OpenDP,Error lacks guidance
+ErrorMessagesUnhelpful,"It says I can specify size in the domain or use make_resize, but doesn't show how",OpenDP,Alternatives without examples
+SensitivityCalculation,"For mean, the sensitivity is (upper_bound - lower_bound) / n, so scale = (upper_bound - lower_bound) / (n * epsilon)",OpenDP,Manual sensitivity calculation
+ImplementationSuccess,"Once I understood that I needed to specify the size in the domain, it worked",OpenDP,Success after understanding
+APIComparison,"IBM DiffPrivLib was simpler - just mean(ages, epsilon=..., bounds=...)",Final Reflection,Comparing APIs
+LearningCurveTooSteep,"OpenDP required me to understand domains, transformations, measurements, and sensitivity calculations",Final Reflection,Complex concepts required
+ExampleCodeGap,Don't jump from trivial examples to full class implementations - show intermediate examples,Final Recommendations,Missing middle-ground examples
+MissingDocumentation,"Explain not just what functions do, but when to use them, common patterns, and the mental model behind the API design",Final Recommendations,Documentation improvements
+ErrorMessagesUnhelpful,"Tell me what type is expected, show an example of correct usage, not just that there's a mismatch",Final Recommendations,Better error messages needed
+APIInconsistency,"Within a library, similar operations should work similarly. IBM's mean() is great, but count() works differently",Final Recommendations,Consistency needed
+HighLevelAPINeeded,"For things like 'count filtered rows' or 'group by and aggregate', provide high-level functions",Final Recommendations,High-level functions requested
+GettingStartedGuide,"Step-by-step tutorials that build from simple to complex, not just API reference",Final Recommendations,Progressive tutorials needed
+DocumentationStructure,"Don't just send people to example codes - provide clear explanations of concepts, then examples",Final Recommendations,Better documentation structure
+OverallAssessment,IBM DiffPrivLib was the most approachable for someone new to DP,Final Summary,Best for beginners
+LearningCurveTooSteep,All three libraries assume you already understand differential privacy well,Final Summary,Expert-oriented design
+LearningCurveTooSteep,"As a Python developer who's new to DP, I needed more hand-holding",Final Summary,More guidance needed
+DocumentationStructure,The documentation structure matters a lot. PyDP and OpenDP both had issues where I couldn't easily find what I needed,Final Summary,Navigation issues

@@ -1,0 +1,83 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P4 (Postdoc Researcher, UK, 9 Py. Yrs, 6 DS Yrs, Intermediate, Academia)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P4: No. We can start.
+
+Ravi Mahankali: So just to confirm your background for the recording, what is your current role and how many years of Python and data science experience do you have?
+
+P4: I'm a Postdoctoral Researcher in the UK, working in academia. I have about 9 years of Python programming experience, and roughly 6 years specifically in data science and statistical analysis. Most of my work involves research datasets, experiments, and publishing reproducible results.
+
+Ravi Mahankali: Great. And did you have any prior experience with Differential Privacy before this session?
+
+P4: Yes, I'd classify my DP experience as intermediate. I've read foundational papers, worked through mathematical proofs, and used DP in some research prototypes. I understand epsilon-delta guarantees, global sensitivity, and basic composition, though I don't know the exact API specifications of these three specific libraries. Knowing the theory doesn't mean I remember where a package expects sensitivity to be declared.
+
+Ravi Mahankali: Perfect. What tools do you normally use in your development workflow, including AI assistants?
+
+P4: Jupyter notebooks for exploration, VS Code for python scripts, and pandas/NumPy for processing. I occasionally use GitHub Copilot for repetitive boilerplate. But for the privacy mechanism itself, I prefer to check official documentation. An autocomplete suggestion isn't evidence that a calculation is mathematically correct.
+
+Ravi Mahankali: Excellent. Let me explain the tasks. Today, you’ll work on two data analysis tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon = 1.0. The dataset is already pre-loaded in the session directory as adult.csv. Please test the libraries in the order indicated on your handout: PyDP first, then IBM DiffPrivLib, then OpenDP. Please think aloud as you work. You can start whenever you are ready.
+
+P4: Right, that makes sense. Let's open VS Code and load `adult.csv` using pandas. 
+
+P4: I'll start by checking the columns and data representation.
+
+P4: The income column contains string values like `<=50K` and `>50K`. For this predicate, adding or removing one individual changes the count by at most 1, so the global sensitivity is 1. Epsilon is fixed to 1.0 by the task prompt.
+
+P4: Now let's try PyDP first for Task A. Since GitHub Copilot is active in my VS Code setup, let me see what autocomplete suggests for PyDP counting.
+
+P4: Copilot suggested `pdp.BoundedCount(epsilon=1.0, lower_bound=0, upper_bound=100)`. Wait a second!
+
+P4: Copilot just made up a function parameter that doesn't exist in PyDP. I'd rather read the official docs than trust AI with privacy logic. The annoying thing is that it looked plausible—it borrowed argument names I was expecting, which is dangerous.
+
+P4: Let me ignore Copilot and check the official PyDP module interface.
+
+P4: Let's run that in the terminal.
+
+P4: Great, that executed successfully. Now let me test IBM DiffPrivLib for Task A.
+
+P4: And finally OpenDP for Task A. OpenDP requires defining explicit domain and metric types.
+
+P4: That executed as well. All three libraries completed Task A.
+
+Ravi Mahankali: That's great, thank you. Let's move to Task B. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work through this problem.
+
+P4: Okay, grouped aggregation across education levels. This requires thinking about how privacy composes across categories.
+
+P4: There are 16 unique education levels in `adult.csv`. Because the groups are disjoint—each individual belongs to exactly one education level—parallel composition applies. Under parallel composition, computing private statistics across disjoint subsets with epsilon=1.0 per group keeps the overall privacy loss bounded by 1.0.
+
+P4: However, if a library's accountant treats each query independently as sequential composition, it would assume total budget spent is 16.0 unless I manually split epsilon across groups (0.0625 per group).
+
+P4: Let's test IBM DiffPrivLib for Task B first. I'll check if there's a native DataFrame groupby helper in DiffPrivLib.
+
+P4: Searching the documentation... there is no native `groupby` helper. I have to write an explicit Python loop over unique education categories.
+
+P4: When computing the mean age per group, I also need range bounds for age. I should select bounds independently of the private observations rather than computing `df['age'].min()` and `df['age'].max()` directly, which would leak uncounted privacy. I'll specify public domain bounds of (0, 100).
+
+P4: The output ran. But allocating 0.0625 per group because of manual budget splitting increases noise significantly on smaller education categories.
+
+Ravi Mahankali: Thank you for working through both tasks. That concludes the coding portion. I'd like to ask a few final debrief questions:
+
+Ravi Mahankali: (1) Which library did you find easiest to use, and why?
+
+P4: IBM DiffPrivLib was the easiest to get started with because its function signatures mirror NumPy and pandas. PyDP was manageable once I checked the C++ wrapper signatures. OpenDP has a steeper learning curve, though its explicit domain-metric structure is valuable for formal verification.
+
+Ravi Mahankali: (2) What was the most challenging aspect of completing these tasks?
+
+P4: Managing the composition arguments and missing native GroupBy functionality. Coordinating dataset partitioning, budget allocation, and range bounds while ensuring every step conforms to formal composition rules takes significant effort.
+
+Ravi Mahankali: (3) Did you feel confident that your implementations were correct and privacy-preserving?
+
+P4: I feel confident in the basic count mathematical logic. But for the grouped analysis, even with my prior DP experience, I found myself unable to justify the choice to a hypothetical reviewer or ethics board. Setting bounds and deciding between parallel versus sequential budget accounting without explicit library-enforced composition leaves ambiguity.
+
+Ravi Mahankali: (4) What would you recommend to library maintainers to improve usability?
+
+P4: Provide end-to-end documentation with complete, realistic data science workflows—including grouped queries, explicit composition guidance, and clear explanations of default assumptions, rather than just isolated code snippets.
+
+Ravi Mahankali: Thank you again for your time and valuable feedback!
+
+P4: Thanks for the opportunity. This was very insightful.

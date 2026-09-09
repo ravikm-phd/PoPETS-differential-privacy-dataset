@@ -1,0 +1,23 @@
+pid,primary_role,region,python_years,ds_years,dp_experience,sector_context
+P1,Data Engineer,UK,5,1,Novice,Industry
+P2,Data Engineer,US,10,4,Intermediate,Industry
+P3,Data Analyst,US,6,2,Novice,Industry
+P4,Postdoc Researcher,UK,9,6,Intermediate,Academia
+P5,ML Engineer,India,5,2,Novice,Industry
+P6,Research Fellow,UK,14,3,Intermediate,Academia
+P7,Software Engineer,US,8,5,Novice,Industry
+P8,DP Specialist,US,10,7,Experienced,Industry
+P9,PhD Student,UK,6,4,Novice,Academia
+P10,Lead Data Engineer,US,15,12,Intermediate,Industry
+P11,Research Assistant,UK,11,6,Novice,Academia
+P12,Senior Developer,India,7,5,Intermediate,Industry
+P13,Applied Scientist,US,12,9,Experienced,Academia
+P14,Data Analyst,US,5,3,Novice,Industry
+P15,Assistant Prof.,UK,13,9,Intermediate,Academia
+P16,Privacy Engineer,US,15,13,Experienced,Industry
+P17,ML Engineer,India,6,4,Novice,Industry
+P18,Postdoc Researcher,UK,9,6,Intermediate,Academia
+P19,PhD Student,US,8,5,Novice,Academia
+P20,Principal Engineer,US,11,9,Experienced,Industry
+P21,Software Developer,India,6,3,Novice,Industry
+P22,Data Architect,India,15,12,Experienced,Industry

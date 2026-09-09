@@ -1,0 +1,119 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P13 (Applied Scientist, US, 12 Py. Yrs, 9 DS Yrs, Experienced, Academia)
+
+---
+
+Ravi Mahankali: Thank you for joining us today. We are studying how developers work with Differential Privacy libraries in practice. You will tackle two data analysis tasks using three DP libraries. Please think aloud throughout — narrate your reasoning and decisions as you go. There are no right or wrong answers. You may use any resources you would normally rely on: documentation, online search, or AI coding assistants if that is part of your workflow. I will not guide your implementation decisions. The session will be recorded and all data will be anonymised. Any questions before we begin?
+
+P13: No, I think I have a clear picture. Ready to go.
+
+Ravi Mahankali: Good. A few background questions first. How many years of Python experience do you have, and how many years of data science specifically?
+
+P13: About twelve years of Python — I started using it in grad school for simulation work and it has been my primary language ever since. In terms of data science specifically, roughly nine years. I moved into applied ML and statistical analysis during my postdoc and have been working as an Applied Scientist since, which sits somewhere between pure research and engineering in practice. My current focus is privacy-preserving machine learning, so differential privacy comes up regularly in my work.
+
+Ravi Mahankali: And your prior experience with Differential Privacy and with these specific libraries?
+
+P13: I would say I am genuinely experienced with DP. I have implemented Laplace and Gaussian mechanisms from scratch in production-adjacent code, worked on composition accounting for multi-query release systems, and I keep up with the literature — I know the Dwork-Roth framework, I have read the concentrated DP papers, and I follow the Opacus work closely. For these three specific libraries: I have used PyDP before since it wraps the Google DP library, which I know well. DiffPrivLib and OpenDP I have read the documentation for but have not deployed in a real project. Today will be my first time actually writing code with those two.
+
+Ravi Mahankali: What does your typical development environment look like?
+
+P13: JupyterLab for exploration, VS Code for anything more structured. Standard scientific Python stack — pandas, NumPy, scikit-learn. I have been using Polars more recently for performance-sensitive work. I use GitHub Copilot but I turn it off when working with a new library because it hallucinates parameter names for less common packages, which is more disruptive than helpful.
+
+Ravi Mahankali: Perfect. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon equal to 1.0. Please use all three libraries in the order shown on your handout, one at a time. The dataset is available as adult.csv in the session directory. Please think aloud as you work.
+
+P13: Okay. Handout says DiffPrivLib first. Let me load the data.
+
+P13: Income column, values '<=50K' and '>50K'. I need a differentially private count of the '>50K' rows. Let me check what DiffPrivLib provides for count operations.
+
+P13: There is a count_nonzero in diffprivlib.tools. Let me try it directly.
+
+P13: TypeError — unexpected keyword argument 'epsilon'. Right, count_nonzero is flagged as not fully privacy-vetted in DiffPrivLib, so it deliberately does not expose epsilon. The intended workaround is to drop to the mechanism layer.
+
+P13: Got 7843. Sensitivity is 1 for a simple count — adding or removing one individual changes the count by exactly 1. The result is correct. This is a valid workaround, but it is entirely undocumented as a pattern. Someone without prior mechanism-level knowledge would not know to do this.
+
+P13: Moving to PyDP.
+
+P13: 7837. That was clean. Count accepts epsilon in the constructor and quick_result handles the rest. I still filter the dataframe externally before passing data in, which means the filtering step sits outside the DP boundary — but for a count query the sensitivity does not change, so this is fine.
+
+P13: Now OpenDP.
+
+P13: I need to build a transformation chain — input domain, count transformation, Laplace measurement. Let me follow their count example.
+
+P13: Type mismatch — the chain expects f64 but the count output is i32. Let me cast.
+
+P13: Got 7840. Took one extra step to sort out the type issue, but the pipeline is logically correct. The error message referenced Rust internal types — 'expected f64, got i32' — which is not meaningful to a Python user who is not familiar with the underlying implementation.
+
+Ravi Mahankali: Good progress. Your second task is to calculate the average age of individuals for each unique education level using Differential Privacy. Please continue with the same library order.
+
+P13: Okay, grouped mean. DiffPrivLib first.
+
+P13: diffprivlib.tools.mean takes a bounds parameter. Let me try calling it without bounds first to see how the library responds.
+
+P13: PrivacyLeakWarning — bounds inferred from data, additional privacy leakage will occur. That is the right behaviour from a design standpoint. The library ran and gave me a result but clearly flagged that I have leaked additional privacy. I need to provide bounds from domain knowledge without inspecting the data.
+
+P13: Clean result, about 38.6, no warning. For a labour market survey, 17 to 90 is defensible domain knowledge — I do not need to look at this specific dataset to justify that range. Now the grouped version. Let me check DiffPrivLib for groupby support.
+
+P13: Nothing — there is no groupby in diffprivlib.tools. This is the structural gap I was expecting. I will have to loop manually over education levels.
+
+P13: The composition question is critical here. There are sixteen education categories in this dataset. If I call mean() once per group with ε=1.0 each, that is sixteen queries. Under sequential composition, the total privacy cost is 16.0. However, the education partition is exhaustive and disjoint — every individual belongs to exactly one group. Under parallel composition, the total privacy cost for disjoint queries is ε=1.0, not 16.0. That is a meaningful difference.
+
+P13: The problem is that DiffPrivLib has no mechanism for me to assert that these queries are over disjoint partitions. The library sees sixteen separate calls to mean(). Whether I spend ε=0.0625 per group with sequential composition accounting or ε=1.0 per group with parallel composition accounting, the library behaves identically. The correctness of the parallel composition claim is entirely on me.
+
+P13: Sixteen groups. Let me run the loop with ε=1.0 per group, relying on the parallel composition argument.
+
+P13: Results look reasonable — 'Bachelors' around 38.4, 'Masters' 40.9, 'Doctorate' 44.6. Those numbers hold together. But I want to be explicit about what just happened: the library provided zero enforcement or verification of my parallel composition argument. If someone without DP training ran this loop with ε=1.0 per group thinking they had set a reasonable privacy budget, they would get plausible-looking results with no indication they had actually exhausted 16ε under sequential composition. That is a real correctness risk.
+
+P13: Moving to PyDP.
+
+P13: For grouped mean I need BoundedMean. Let me check a single group first.
+
+P13: 38.2 for 'Bachelors'. For the full loop, I am in the same structural position as with DiffPrivLib. PyDP has no groupby support either, and it cannot reason about whether my per-group queries are over disjoint partitions. The parallel composition accounting is still my responsibility. I will run the same loop.
+
+P13: Results consistent with DiffPrivLib — same reasonable range of values. One difference I notice: PyDP requires bounds explicitly in the constructor and does not warn if the bounds I provide are wrong or unnecessarily wide. DiffPrivLib at least told me when it was inferring bounds from data. PyDP just silently accepts whatever I give it — which means incorrectly specified bounds would introduce a privacy violation with no indication from the library.
+
+P13: Okay, OpenDP now. Let me try building a mean pipeline with the core API.
+
+P13: I need a clamping transformation, then a mean transformation, then a Laplace measurement. Let me chain these for one education group.
+
+P13: Got 38.3 for 'Bachelors'. The pipeline worked after I sorted out the domain specifications. For the full loop across sixteen groups, I would need to reconstruct the pipeline for each group — and I would still face the same composition issue as with the other libraries. The core API does not handle parallel composition across a groupby automatically.
+
+P13: Actually — hold on. I remember seeing a Polars-based integration for OpenDP at a conference earlier this year. The demo showed a context-level compositor that handled groupby with automatic partition-aware composition. Let me see if I can find it in the documentation.
+
+P13: Here it is — dp.Context.compositor. Takes a Polars lazy scan and handles privacy accounting at the DataFrame level. Let me set this up.
+
+P13: Context initialized. Now the grouped mean. Let's see what GitHub Copilot auto-completes for the Polars OpenDP query syntax.
+
+P13: Copilot auto-completed `pl.col("age").dp.mean(bounds=(17.0, 90.0), epsilon=1.0)`. But when I execute it, OpenDP throws `TypeError: dp.mean() got an unexpected keyword argument 'epsilon'`. Copilot placed `epsilon` inside `.dp.mean()`, but in OpenDP's Polars integration, `epsilon` is declared globally on the `Context.compositor(privacy_loss=dp.loss_of(epsilon=1.0))` level, not on the column expression. Copilot tried to mimic standard functions, but OpenDP's Context pattern decouples privacy budget from column expressions.
+
+P13: That ran — all sixteen education groups in a single output. 'Bachelors' at 38.6, 'Doctorate' at 44.7, 'HS-grad' at 37.4. These are numerically stable and consistent with what I got from the other libraries. And critically, the library handled the composition accounting itself — I did not have to manually assert that the groups were disjoint. This is the first time today that a library actually resolved the GroupBy composition problem correctly rather than leaving it to me.
+
+P13: But here is the thing — if I hadn't seen this in a conference talk, I'd never have found it. The OpenDP documentation leads with the core functional API, which is where I started. I did not encounter a link to this Polars integration in the first several pages I navigated. I knew to go looking for it specifically because I had seen a demo of it about six months ago. Without that prior exposure, I would have spent the entire session on the core API and concluded that OpenDP had exactly the same structural gap as DiffPrivLib and PyDP.
+
+Ravi Mahankali: That is an important observation. Ready to wrap up?
+
+P13: Yes. Summary: Task A was manageable across all three libraries once I knew to use the mechanism-fallback pattern for DiffPrivLib. Task B was the revealing one. DiffPrivLib and PyDP both lack native groupby support with composition awareness. I could get numerically reasonable results by relying on the parallel composition theorem, but the libraries offered no enforcement or verification of that reasoning. The OpenDP core API has the same gap. The Polars Context integration solves it correctly — but discoverability is a serious problem, and it is not the kind of thing someone finds through normal documentation navigation.
+
+Ravi Mahankali: A few closing questions. Which library was easiest to use overall, and why?
+
+P13: DiffPrivLib had the most accessible entry point — the API mirrors NumPy and pandas, which lowers the cognitive overhead, and the PrivacyLeakWarning is a genuinely good design decision. The OpenDP Polars integration was the most ergonomic for the grouped task once I found it. But as a complete package from entry to correct result, I would say DiffPrivLib for Task A and OpenDP-with-Polars for Task B, with the significant caveat that the latter requires prior knowledge to discover.
+
+Ravi Mahankali: What was the most challenging aspect of these tasks?
+
+P13: The GroupBy gap is the structural problem. None of the three libraries handle grouped queries with correct parallel composition in an enforced, documented way. I know the theory well enough to apply it manually, but there is nothing in the API surface that would catch a practitioner who gets the composition accounting wrong. For a library whose entire value proposition is correctness guarantees, leaving this to developer judgment is a meaningful gap.
+
+Ravi Mahankali: Could you justify your choice of epsilon to a reviewer?
+
+P13: I chose 1.0 because it is the conventional midpoint in the literature for this kind of tabular query — it sits at what most practitioners would describe as a reasonable privacy-utility trade-off for count and mean statistics on demographic data. But if a reviewer pressed me on the specific privacy risk for this particular dataset and research question — what ε=1.0 actually implies about information leakage for an individual in this population — I could not give a fully rigorous answer without additional analysis. I could cite prior deployments using similar values, but that is an argument from convention rather than from first principles. That gap exists even with my background. None of the libraries helped with it today; the epsilon choice was entirely my judgment call from start to finish.
+
+Ravi Mahankali: How confident were you that your implementations were correct and privacy-preserving?
+
+P13: For the count tasks, confident — sensitivity is unambiguous for a counting query. For the grouped mean in DiffPrivLib and PyDP, I believe the parallel composition argument is correct, but the libraries did not verify it. For the OpenDP Polars integration, most confident — the library handled the composition accounting and I was not relying solely on my own reasoning. Across all three libraries, epsilon selection remained entirely outside their scope, which means that even a correct implementation might be using a privacy budget that cannot be defended to an external auditor.
+
+Ravi Mahankali: Is there anything you would do differently on a real project?
+
+P13: A few things. First, I would want the Polars-style Context pattern available in DiffPrivLib and PyDP as well — the automatic partition-aware composition should not be an OpenDP-exclusive feature. Second, a utility preview would be valuable: given epsilon, sensitivity, and expected group size, what noise magnitude should I expect? That would let me evaluate upfront whether my parameter choices will produce usable results. Third, I would want documentation that surfaces the Polars integration prominently rather than burying it three levels deep — the design philosophy is correct but it only matters if developers can actually find it.
+
+Ravi Mahankali: Thank you. This has been very helpful.
+
+P13: Happy to contribute. The core guarantees these libraries provide are sound. But there is still a substantial gap between what they expose and what a practitioner needs to use them correctly at scale — and that gap does not close just because the developer has a strong theoretical background.

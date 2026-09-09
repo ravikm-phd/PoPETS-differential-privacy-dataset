@@ -1,0 +1,69 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+ExperienceLevel,"About five years, but not consistently. I've been using it less over time",Survey,Variable Python experience
+LackOfKnowledge,I hadn't heard about it until I read the documents he sent me,Survey,No prior DP knowledge
+LackOfKnowledge,"Yeah, I'm starting like have an idea of what it is",Survey,Basic understanding from briefing
+NoPreparation,"I hadn't gone through any documentation of them, no",Survey,No library documentation review
+DocumentationSearch,Introduction that's not useful. Let me look at example codes,PyDP,Seeking useful documentation
+TaskUnderstanding,I just want to count uh... individuals in the income bracket above 50K,PyDP,Understanding the task
+ExampleCodeDiscovery,This looks useful. This has like import count. That might be relevant,PyDP,Finding relevant example
+DataFormatIssue,I can't see the column names,PyDP,Data visibility issue
+DataFormatIssue,"After the comma for the income, there is a space between comma and less than",PyDP,Whitespace in data
+DataFormatIssue,I would have spent a while like trying to notice that,PyDP,Subtle data issues
+DocumentationStructure,"If there was documentation, could I feel like the documentation just sent me into example codes? Maybe I'm just looking in the wrong place",PyDP,Documentation navigation problem
+PrivacyParameterConfiguration,The privacy budget. Am I allowed to put any value for that?,PyDP,Uncertainty about epsilon
+PrivacyParameterConfiguration,"Typical values include 0.1 for strong privacy, 1.0 for standard privacy. So I guess I'll put a one as I don't really understand",PyDP,Using default without understanding
+PrivacyParameterConfiguration,Delta is privacy failure possibility. I mean zero seems like an interesting number,PyDP,Uncertain about delta
+BoundsConfiguration,In the example they've just done zero to 100. And in their data they have 180 things I'm not too sure what's going on there,PyDP,Bounds confusion
+ErrorOccurred,I've got an error,PyDP,Error encountered
+FileNamingConflict,The file name should not be the same as the library... there is a conflicting issue,PyDP,File naming problem
+FileNamingConflict,Why have we all classic get catch? Rename. I'll just call it like not PyDP dot py,PyDP,Renaming file to fix conflict
+DataFormatIssue,Something about regex is... multi chart delimiter,PyDP,Delimiter parsing issue
+DataFormatIssue,"OK, supposedly it does support it, but I have to use a regex. And that's not quite. I can't tell what that is doing",PyDP,Regex requirement confusing
+FrustrationExpressed,I feel like the docs are always so hard to read,PyDP,Documentation frustration
+MentalModelMismatch,"I don't want to compute the sum, do I? I want to count how many values there are",PyDP,Function mismatch
+APIDiscoverability,"May just be dot count, hopefully",PyDP,Guessing at function names
+ErrorMessagesUnhelpful,"Unexpected keyword argument delta. Oh no, that's because this is for the other argument",PyDP,Confusing error message
+APIMisuse,"Unexpected keyword argument, but it seems to be that",PyDP,Wrong API usage
+HowShouldIUseThis,Can't compute compute the count of numbers of items and data... Count as a clause. Huh. That doesn't seem to,PyDP,API confusion
+ErrorMessagesUnhelpful,I can't pass in a list. But they have passed their list so,PyDP,Inconsistent behavior
+WrongResults,"That seems to be 32,000, which I feel like that's... I mean that could be",PyDP,Unexpected result
+WrongResults,That's the total row count actually,PyDP,Counting all rows not filtered
+ConfusionExpressed,"I've got the total Rd count, yeah, 32,562. So some things going wrong",PyDP,Result confusion
+DebuggingEffort,Maybe I should do... I've the groups of rows and columns,PyDP,Trying to debug
+WrongResults,Empty data frame. Ah,PyDP,Unexpected empty result
+DataFormatIssue,"It's only giving you income as the header of a single column, but then it is giving you the date of everything",PyDP,Column parsing error
+DataFormatIssue,Oh. Good catch,PyDP,Data format realized
+ErrorMessagesUnhelpful,Incompatible arguments. Did I write income incorrectly?,PyDP,Unhelpful type error
+ErrorMessagesUnhelpful,The following argument type is supported,PyDP,Vague error guidance
+ColumnNameIssue,Income also has a space before that after comma,PyDP,Whitespace in column names
+ConfusionExpressed,Hey I'm a bit confused,PyDP,Developer confused
+DocumentationStructure,The documentation structure is really confusing. It just sends me to example codes without clear explanations,PyDP Summary,Documentation critique
+ErrorMessagesUnhelpful,The error messages aren't very helpful either. They tell me something is wrong but don't clearly explain how to fix it,PyDP Summary,Error message critique
+LibrarySwitch,Let me try IBM DiffPrivLib instead. Maybe it will be clearer,IBM DiffPrivLib,Switching libraries
+HowShouldIUseThis,"Wait, how do I use this? The documentation says count(array, epsilon=...) but I need to count rows that match a condition",IBM DiffPrivLib,Function usage unclear
+HowShouldIUseThis,"I think I need to filter the data first, then count the length, and apply DP to that count? Or can I pass a boolean array?",IBM DiffPrivLib,Multiple possible approaches
+MissingDocumentation,The documentation isn't super clear. It says 'count' but doesn't show a clear example of counting filtered rows,IBM DiffPrivLib,Missing use case example
+WorkaroundRequired,Maybe I should use mechanisms directly?,IBM DiffPrivLib,Resorting to lower-level API
+SensitivityKnowledge,"For counting, if I add or remove one row, the count changes by at most 1, so sensitivity should be 1",IBM DiffPrivLib,Applying DP theory
+WorkaroundRequired,I feel like I'm working around the library rather than using it as intended,IBM DiffPrivLib,Workaround feels wrong
+MissingDocumentation,The documentation should make this clearer - when to use tools vs mechanisms directly,IBM DiffPrivLib,API guidance missing
+BoundsConfiguration,The bounds are important - I need to specify the min and max possible values for age,IBM DiffPrivLib,Understanding bounds
+BoundsConfiguration,"I could use (17, 90) or be more conservative with (0, 100). I'll use (0, 100) to be safe, though it might add more noise",IBM DiffPrivLib,Bounds tradeoff
+ImplementationSuccess,This task was much easier with IBM DiffPrivLib than Task 1,IBM DiffPrivLib,Successful implementation
+PositiveFeedback,"The mean() function is straightforward and well-documented. The API is consistent - I pass data, epsilon, and bounds. It's intuitive",IBM DiffPrivLib,Positive feedback on mean
+ExampleCodeGap,"The examples are helpful, though they jump from very simple to very complex",Final Reflection,Example gap noted
+DocumentationStructure,The documentation structure is confusing - it just sends you to example codes without clear explanations,Final Reflection,Documentation structure critique
+ErrorMessagesUnhelpful,I had trouble understanding the data format requirements. The error messages weren't very helpful,Final Reflection,Error and documentation issues
+FileNamingConflict,The file naming conflict issue was frustrating - I couldn't name my file the same as the library,Final Reflection,File naming frustration
+PositiveFeedback,Simple API for common operations like mean. The mean() function is intuitive,Final Reflection,Positive on mean function
+APIInconsistency,"The count() function was confusing for filtered data. I had to use mechanisms directly, which felt like a workaround",Final Reflection,Count function issues
+MissingDocumentation,Documentation lacks examples for common use cases like counting filtered rows,Final Reflection,Missing examples
+ExampleCode,"Show real-world scenarios like 'count rows matching condition' with complete, working code",Final Recommendations,Better examples needed
+ClarityOfDocumentation,"Explain not just what functions do, but when to use them, common patterns, and the mental model behind the API design",Final Recommendations,Documentation improvements
+ErrorMessagesUnhelpful,"Tell me what type is expected, show an example of correct usage, not just that there's a mismatch",Final Recommendations,Better error messages
+APIConsistency,"Within a library, similar operations should work similarly",Final Recommendations,Consistency needed
+DocumentationStructure,"Organize documentation better. Don't just send people to example codes - provide clear explanations of concepts, then examples",Final Recommendations,Structure improvement
+OverallAssessment,IBM DiffPrivLib was the most approachable for someone new to DP,Final Summary,Best for beginners
+LearningCurveTooSteep,All three libraries assume you already understand differential privacy well,Final Summary,Expert-oriented design
+LearningCurveTooSteep,"As a Python developer who's new to DP, I needed more hand-holding",Final Summary,More guidance needed
+FileNamingConflict,The file naming issue with PyDP was really frustrating... This should be better documented or handled by the library,Final Summary,File naming critique

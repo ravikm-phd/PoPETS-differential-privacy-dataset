@@ -1,0 +1,125 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P11 (Research Assistant, UK, 11 Py. Yrs, 6 DS Yrs, Novice, Academia)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P11: No, all clear. Happy to get started.
+
+Ravi Mahankali: A few background questions first. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P11: Python — eleven years, going back to my undergraduate statistics degree. Data science properly — six years. I work on machine learning fairness research, so a lot of what I do involves analysing datasets like this one. More analytical than engineering, I'd say.
+
+Ravi Mahankali: And what is your prior experience with Differential Privacy?
+
+P11: I know the theory reasonably well. I've read through the Dwork and Roth primer and DP crops up a fair bit in the fairness literature I follow. But I've never implemented anything using these three libraries before — today's the first time.
+
+Ravi Mahankali: What does your development environment look like?
+
+P11: Jupyter notebooks for exploratory work, VS Code for scripts. Standard stack is pandas, NumPy, scikit-learn. I don't use AI assistants as a rule — I prefer to read documentation myself.
+
+Ravi Mahankali: Great. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon equal to 1.0. Please use all three libraries in the order on your handout, one at a time. The dataset is available as adult.csv in the session directory. Please think aloud as you work.
+
+P11: Right. The handout says to start with OpenDP.
+
+P11: Okay — '<=50K' and '>50K'. I need a DP count of the '>50K' rows.
+
+P11: OpenDP uses a pipeline model. I chain transformations and measurements. Let me find a count example in their docs.
+
+P11: There's a make_count. I need to pass it an input domain and metric. I'll filter the DataFrame to '>50K' rows first and then count the resulting list.
+
+P11: Now I'll try chaining make_count with make_laplace.
+
+P11: Carrier type error — it's expecting f64 but make_count returns an integer. I'll cast.
+
+P11: Still a type mismatch. Let me check the expected input metric.
+
+P11: The chain wants AtomDomain<i32> not VectorDomain. I think I need to wrap this differently.
+
+P11: Okay, that ran. Got roughly 7841. The pipeline works, but I had to go back to the docs twice just to sort out the type chain. For a simple count, that's a fair bit of overhead.
+
+Ravi Mahankali: Please continue with DiffPrivLib.
+
+P11: TypeError — count_nonzero doesn't accept epsilon. That's... odd for a DP library.
+
+P11: Right, it's marked as not fully privacy-vetted, so they block epsilon entirely. I'll use the Laplace mechanism directly.
+
+P11: Actually — thinking about this properly. I have two income categories. I could set up two Laplace queries, one per category, and get the full distribution. Let me try that.
+
+P11: Got roughly 7840 and 24718. But wait — I only need the count for >$50K. I'm essentially spending privacy budget on information I don't need.
+
+P11: I'm now worried whether the sensitivity specification is actually correct as well. The sensitivity for a simple count is 1 — one individual can change the count by at most 1. That seems right. But I've now spent epsilon on the <=50K count I'm not going to use.
+
+P11: Let me simplify — just one Laplace query on the filtered count.
+
+P11: Got 7843. That's cleaner. The mechanism fallback works, but it feels like the wrong abstraction level for what should be a basic count query.
+
+Ravi Mahankali: Please continue with PyDP.
+
+P11: Got 7838. That was straightforward — epsilon in the constructor, quick_result runs it. Cleanest of the three for this task.
+
+Ravi Mahankali: Good. Your second task is to calculate the average age of individuals for each unique education level using Differential Privacy. Please start from the beginning of your library order.
+
+P11: Grouped aggregation. This is going to be more involved.
+
+P11: For a mean I need to chain clamp, then mean, then Laplace. The mean transformation requires a known input size, which means I'd need to specify group size per partition. Let me try building it for one group.
+
+P11: Metric incompatibility — L1 versus L2. Let me switch to L2 in the input metric.
+
+P11: Got about 38.2 for Bachelors. Plausible. But to do all sixteen education groups I'd need to rebuild this pipeline per group, and I still have no way to express that they're disjoint partitions. The library treats each pipeline as independent.
+
+Ravi Mahankali: Please continue with DiffPrivLib.
+
+P11: I'll look for a groupby function in DiffPrivLib.
+
+P11: ...there's nothing. I've searched the tools module and I can't find any groupby functionality at all. How can a data privacy library not support groupby? That's one of the most basic operations in any data pipeline.
+
+P11: Right. I'll have to loop manually over education levels. How many are there? Sixteen.
+
+P11: Let me query Gemini in a side tab: "If I iterate over 16 disjoint education levels with diffprivlib.tools.mean, how should I split my total privacy budget epsilon=1.0?"
+
+P11: Gemini gives contradictory advice! In the first paragraph, it says: "Because the subsets are disjoint, parallel composition applies, so you can assign epsilon=1.0 to every group." But then in the code snippet it generates, it writes `epsilon = 1.0 / 16` and splits the budget to `0.0625` per group anyway! The AI model gives contradictory theoretical prose and then outputs code that ruins utility by splitting budget unnecessarily. AI assistants are really confusing on composition rules.
+
+P11: I'll stick with my own theoretical reasoning — since education groups are disjoint, parallel composition holds, so `epsilon=1.0` per group is theoretically valid.
+
+P11: Sixteen. And before I loop, let me check what happens if I call mean without bounds.
+
+P11: There's a PrivacyLeakWarning — bounds weren't specified so the library inferred them from the data, which is itself a privacy leak. Fair enough. I need to set bounds explicitly.
+
+P11: For age, I'll use 17 to 90. That's a reasonable domain assumption for an adult labour survey without looking at the data.
+
+P11: Now the composition question. If I loop over 16 groups with epsilon=1.0 each, total spend is 16.0 under sequential composition. But these partitions are disjoint — every individual belongs to exactly one education group — so parallel composition should apply and the total is still 1.0. The problem is DiffPrivLib doesn't know that. It just sees 16 separate function calls.
+
+P11: If I can't trust myself on the parallel composition reasoning, I should split: 1.0 divided by 16 is 0.0625. Let me run both and compare.
+
+P11: 'Preschool' is 178.4. 'Doctorate' is -31.7. So at split epsilon the results are completely unusable — noise swamps everything for small groups.
+
+P11: 'Bachelors' at 38.5, 'Doctorate' at 44.2 — plausible. But I've had to make the parallel composition judgement myself with no library verification. Someone less familiar with composition theory would have no idea whether they're within budget or far outside it.
+
+Ravi Mahankali: Please continue with PyDP.
+
+P11: 38.3. The API is reasonably clean — bounds go in the constructor. But same problem: no groupby, same manual loop required, same composition question left to me.
+
+P11: Results look sensible — higher means for Doctorate and Masters, lower for lower educational attainment. At least PyDP's individual query interface is the simplest of the three.
+
+Ravi Mahankali: Thank you. A few closing questions. Which library did you find easiest to use, and why?
+
+P11: PyDP for Task A — epsilon in the constructor, quick_result, done. DiffPrivLib was accessible once I knew to go to the mechanism layer, though the count_nonzero limitation was frustrating. OpenDP is conceptually clean but the type system cost is too high for routine work. I spent longer debugging types than thinking about privacy.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P11: The groupby gap, without question. None of the three libraries support grouped aggregation natively. That forces a manual loop, which immediately creates a composition problem — and none of the libraries help you reason about whether your queries are sequential or parallel. A researcher with less DP background would almost certainly over-spend their budget without realising it.
+
+Ravi Mahankali: Did you feel confident your implementations were correct?
+
+P11: Task A — yes, mostly. For Task B, I believe the parallel composition argument is sound for disjoint partitions, but the library gave me no verification. I'm relying entirely on my own reasoning. If I got the composition wrong, the privacy guarantee is silently broken.
+
+Ravi Mahankali: Is there anything you would have done differently on a real project?
+
+P11: I'd want native partition-aware groupby in all three libraries. And I'd want some utility estimate — given my epsilon and expected group sizes, what noise level should I expect? Right now that calculation is entirely on the developer. For small groups it can make the whole output meaningless, and there's no warning before you run it.
+
+Ravi Mahankali: Thank you very much. Your participation is appreciated.
+
+P11: Thank you. The libraries are theoretically sound, but the gap between what they expose and what a working researcher actually needs is quite wide. The groupby limitation especially — it's not an edge case. It's the default way anyone would want to slice a dataset.

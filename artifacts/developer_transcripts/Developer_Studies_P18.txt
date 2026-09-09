@@ -1,0 +1,73 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P18 (Postdoc Researcher, UK, 9 Py. Yrs, 6 DS Yrs, Intermediate, Academia)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P18: No questions from my side, that's all very clear. I'm ready to begin.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P18: I'm a Postdoctoral Researcher at a UK university, working in computational social science and statistical modeling. I have about 9 years of Python experience and 6 years of data science experience.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with PyDP, IBM DiffPrivLib, or OpenDP specifically?
+
+P18: I have intermediate theoretical knowledge of Differential Privacy. I understand mathematical definitions of epsilon, Laplace mechanisms, sensitivity, and sequential vs parallel composition. However, I haven't deployed production DP pipelines using these libraries, so today is my first hands-on test with PyDP, DiffPrivLib, and OpenDP.
+
+Ravi Mahankali: Excellent. What does your typical development environment look like?
+
+P18: VS Code and Jupyter notebooks on macOS, using standard data science packages like pandas, NumPy, and scikit-learn.
+
+Ravi Mahankali: Perfect. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with total budget epsilon equal to 1.0. You are expected to complete this task using all three libraries in the order: PyDP first, then IBM DiffPrivLib, then OpenDP. The dataset is loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P18: Right. Let me load `adult.csv` in pandas first.
+
+P18: Ground truth count for `income > 50K` is 7841. Now I'll implement Task A starting with PyDP.
+
+P18: PyDP returned 7836. That executed cleanly. The `Count` class accepts epsilon directly and handles noise addition, though I had to pre-filter data into a Python list first.
+
+P18: Now moving to IBM DiffPrivLib for Task A. Let's look for a count function under `diffprivlib.tools`.
+
+P18: TypeError: `count_nonzero()` got an unexpected keyword argument 'epsilon'. The function signature in this version doesn't accept epsilon, so I'll drop down to the `Laplace` mechanism directly.
+
+P18: DiffPrivLib returned 7838. Sensitivity for a count query is 1, so the mechanism call works.
+
+P18: Now let's try OpenDP for Task A.
+
+P18: OpenDP returned 7845. The pipeline works once input domain and carrier types align explicitly.
+
+Ravi Mahankali: Great. Now let's move to Task B. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work.
+
+P18: So Task B is a grouped average across 16 education categories in the dataset.
+
+P18: There are 16 unique education levels in `adult.csv`. Let's check privacy composition. Under sequential composition, splitting total budget `epsilon = 1.0` across 16 queries allocates `1.0 / 16 = 0.0625` per group.
+
+P18: Let's test this budget split first in PyDP.
+
+P18: Results show high noise: 'Preschool' is 214.7 and 'Doctorate' is -19.3! With epsilon 0.0625 and small group sizes, Laplace noise completely swamping the signal.
+
+P18: But because education categories form disjoint partitions of the dataset, parallel composition applies theoretically. Under parallel composition, every group query can use `epsilon = 1.0` while maintaining an overall dataset privacy loss of 1.0.
+
+P18: With `epsilon = 1.0` per group under parallel composition, averages are plausible ('Bachelors': 38.2, 'Masters': 40.7, 'Doctorate': 44.1). However, PyDP, DiffPrivLib, and OpenDP core loops provide no native DataFrame GroupBy helper to verify that group partitions are disjoint or track parallel composition automatically.
+
+Ravi Mahankali: Thank you — that completes the tasks. A few closing debrief questions. Which library did you find most usable, and why?
+
+P18: PyDP was the most straightforward for single mechanism calls. DiffPrivLib felt familiar due to its NumPy-style structure. OpenDP provides formal composition guarantees, but its strict typing friction and domain construction create a high barrier for researchers.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P18: The lack of native DataFrame GroupBy helpers across all three libraries, forcing manual loops and manual parallel vs sequential composition decisions.
+
+Ravi Mahankali: Did you feel confident in your implementations?
+
+P18: For single aggregate counts, yes. For grouped means, I am confident in the mathematical reasoning for parallel composition, but the libraries do not track or verify partition disjointness in code.
+
+Ravi Mahankali: What would you recommend to maintainers of DP libraries?
+
+P18: Build native DataFrame GroupBy integration with automatic parallel composition tracking, simplify type error tracebacks, and provide clear guidance on bounds selection without uncounted privacy leakage.
+
+Ravi Mahankali: Thank you very much for your time and feedback.
+
+P18: Thank you!

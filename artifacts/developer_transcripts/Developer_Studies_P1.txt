@@ -1,0 +1,133 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P1 (Data Engineer, UK, 5 Py. Yrs, 1 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We’re interested in understanding how developers use Differential Privacy libraries in practice. Today, you’ll work on two data analysis tasks using one or more Differential Privacy libraries. I want you to think aloud as you work—verbalize your thoughts, questions, and decisions as you would if you were explaining your process to a colleague. There are no right or wrong answers; we’re interested in your natural approach to solving these problems. You can use any resources you normally would: documentation, online search, Stack Overflow, AI coding assistants if that is your normal workflow. Feel free to ask me clarifying questions, but I won’t guide your implementation decisions. The session will be audio and screen recorded for analysis. All data will be anonymized. Do you have any questions before we begin?
+
+P1: No, that all sounds brilliant. I'm ready when you are.
+
+Ravi Mahankali: Great. Before we jump into the tasks, I have a quick demographic questionnaire. How many years of Python programming experience do you have? And how many years of data science or analytics experience?
+
+P1: I’ve been working as a Data Engineer here in the UK for about 5 years now. Python is my daily driver for building ETL pipelines and backend data processing. As for data science specifically, I've got maybe 1 year of actual analytics experience. I mostly move data around rather than building models.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, if any, and your familiarity with specific libraries like DiffPrivLib, PyDP, or OpenDP?
+
+P1: I should mention that I've never worked with differential privacy before. I read the briefing materials you sent over, so I understand the basic idea of adding noise to protect individual privacy... but I haven't actually implemented anything with these specific libraries yet.
+
+Ravi Mahankali: That's completely fine. And what is your typical development environment and tools, including AI assistants?
+
+P1: I usually stick to VS Code. I use pandas for data manipulation. I don't use AI assistants much, maybe occasionally for a complex regex, but I mostly rely on reading the official documentation and Stack Overflow.
+
+Ravi Mahankali: Excellent. Let's move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon = 1.0. You can start with any of the three libraries we’ve discussed: IBM DiffPrivLib, PyDP, or OpenDP. You’re expected to complete the tasks using all three libraries, using one at a time, in the order indicated on your handout. The dataset is already loaded in the session directory as adult.csv. Please think aloud as you work, and let me know when you’ve completed the task or if you have questions.
+
+P1: Right then. I'll open up a new Jupyter notebook in the VM. The handout says to start with IBM DiffPrivLib, so I’ll tackle that first.
+
+P1: Let's have a look at the data. Okay, there's an 'income' column. The values look like '<=50K' and '>50K'. So I just need a simple count of the rows where income is '>50K'. In standard pandas, I'd just do a boolean filter and grab the length.
+
+P1: Let's bring up the IBM DiffPrivLib documentation. I'll search for how to do a count.
+
+P1: Let's look at the models and tools available. I'm looking for a count function. I'll check diffprivlib.tools... I don't see count or count_nonzero in the main tools list. That's a bit odd. They have `mean`, they have `sum`, `std`, but no standard count?
+
+P1: Let me use the search bar in the docs. Okay, it looks like there actually is a `count_nonzero` function. It must just be buried. I'll import that.
+
+P1: Let me create the boolean mask first.
+
+P1: Now I'll pass the mask to the DP function. I need to set epsilon to 1.0.
+
+P1: Let's run this cell.
+
+P1: Ah. Error: TypeError: count_nonzero() got an unexpected keyword argument 'epsilon'. Wait, what? It's a differential privacy library. How can the main privacy parameter be an unexpected keyword argument?
+
+P1: Let me read the `count_nonzero` docs again.
+
+P1: Okay, apparently `count_nonzero` in this version doesn't accept `epsilon` directly? Or maybe it pulls it from some global environment variable? The documentation says this is because some features haven't been fully vetted for privacy guarantees. This is actually reassuring... but it completely blocks me from doing this basic task using their high-level tools.
+
+P1: If I can't use the high-level tool, I'll have to build the mechanism myself. I'll count it normally in pandas and then add the noise.
+
+P1: Now I need to add Laplace noise. Let's look at `diffprivlib.mechanisms.Laplace`.
+
+P1: I spent twenty minutes searching the documentation just to figure out how to pass a custom sensitivity value. The sensitivity of a count query should just be 1, right? One person can only change the count by 1.
+
+P1: Let's run that. Okay, it printed 7842.6. The real count was 7841. So that worked. But I'm basically doing manual implementation. WORKAROUND COMMENT: I'm using a histogram function when I really just need a simple count. Well, rather, I'm falling back to the raw mechanisms because the tools are broken for my use case. I'm getting results, but I'm not 100% confident they're correct.
+
+Ravi Mahankali: That's a great insight, thank you. You can move on to the next task. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy. Again, you can start with any of the three libraries you prefer (in the order on your handout). Think aloud as you work through this problem.
+
+P1: Cheers. Average age by education level. So this is a GroupBy operation, calculating the mean of the age column. I'll stick with DiffPrivLib since I already have the docs open.
+
+P1: Let me search the docs for how to do a GroupBy.
+
+P1: Searching the documentation for groupby... I'm not finding anything... How can a data privacy library not support it? Grouping data is literally the most common operation in data engineering.
+
+P1: Alright, if there's no native GroupBy, I'm going to have to write a manual Python `for` loop over all the unique education levels.
+
+P1: So there are 16 unique education levels.
+
+P1: Let me write the loop.
+
+P1: Wait, I need to think about the privacy budget. If I use epsilon 1.0 for the first group, and 1.0 for the second group... The composition rules are left to the user to implement correctly. Because the groups are disjoint, one person is only ever in one education level. So technically, parallel composition means the total epsilon is still 1.0, right?
+
+P1: But DiffPrivLib doesn't know these queries are parallel. It's just going to see 16 separate queries. I don't know how to tell it they are disjoint. So if I want to be strictly safe, I have to split the budget.
+
+P1: With 16 education levels in the Adult dataset, my epsilon per group becomes 1.0/16 = 0.0625, which adds a LOT of noise.
+
+P1: I'll use diffprivlib.tools.mean.
+
+P1: Let me run this.
+
+P1: I'm getting an error about bounds. The documentation mentions I need to specify bounds for the data. It needs a lower and upper bound to calculate the sensitivity of the mean.
+
+P1: How do I know the bounds of ages in the dataset without looking at the dataset? I had to guess the age bounds (17--90)... The library doesn't help me determine appropriate bounds from the data in a privacy-preserving way. If I run subset.min() and subset.max(), I'm leaking data before I even apply the privacy mechanism. So I'll just hardcode 17 and 90.
+
+P1: Let's run the whole loop and print the results.
+
+P1: Wow. Look at these outputs. For 'Preschool', the average age is 243.7. For 'Doctorate', it's -45.2.
+
+P1: The noise completely overwhelms the signal. Every time I run the script, the average age jumps around by 5 years. I know it's noise, but it makes unit testing impossible.
+
+P1: This is completely unusable. The noise added by an epsilon of 0.0625 on a small group like 'Preschool' just throws the mean wildly out of bounds. With realistic privacy budgets and multiple queries, the noise often overwhelms the signal.
+
+P1: Let me try PyDP instead. Maybe it handles grouping better.
+
+P1: I'll check the PyDP docs for a groupby.
+
+P1: PyDP doesn't have a native dataframe groupby either. The example code only shows how to use this with synthetic arrays, not real-world Pandas dataframes.
+
+P1: So I'd have to write the exact same loop. And I'd hit the exact same budget splitting problem. Triple epsilon splitting: groups -> sum/count -> very small eps.
+
+P1: Let me try OpenDP. Maybe their pipeline handles it.
+
+P1: The API uses the term 'space_of', which means nothing to me as a standard Python developer. Having to learn about sensitivities, metrics, domains, and scales all at once before writing code is just too much.
+
+P1: Let's try to just build a simple pipeline for one group.
+
+P1: OpenDP's type system is very strict... This caught several bugs but also slowed me down significantly. Juggling the functional chains, type casting, and budget math all at the same time is exhausting.
+
+P1: I ended up searching Stack Overflow to find out how others handle this dtype error. But there are almost no good examples online, and some of the tagged questions on Stack Overflow have zero answers.
+
+P1: I just spent an hour trying to figure out why my Differential Privacy mean was returning NaN instead of throwing an error.
+
+P1: Honestly? I'm exhausted. Trying to remember the privacy budget, data types, bounds, and the specific syntax for each operation all at once is overwhelming. I'm going to stop here. I managed to get the count working with a workaround, and the grouped mean working but with terrible utility.
+
+Ravi Mahankali: That is perfectly fine, and we appreciate your effort. Thank you for your participation. Before we finish, I’d like to ask a few brief questions:
+
+Ravi Mahankali: (1) Which library or libraries did you find easiest to use, and why?
+
+P1: IBM DiffPrivLib was definitely the easiest to start with because it resembles NumPy and Pandas, even if the tools didn't work exactly as expected. OpenDP was just too theoretical.
+
+Ravi Mahankali: (2) What was the most challenging aspect of completing these tasks?
+
+P1: Dealing with the missing GroupBy functionality. Because I had to implement the loop myself, I had to manage the privacy budget manually, which resulted in completely destroyed utility. And guessing the bounds without leaking data was a huge catch-22.
+
+Ravi Mahankali: (3) Did you feel confident that your implementations were correct and privacy-preserving?
+
+P1: Not at all. The library doesn't provide any way to verify the privacy guarantees are being met. I basically just had to trust that me dropping down to the low-level Laplace mechanism was mathematically sound.
+
+Ravi Mahankali: (4) Is there anything you would have done differently if this were a real project?
+
+P1: I would need significantly better documentation. None of the libraries provide good guidance on choosing epsilon or managing the privacy budget across multiple queries. Without that, I wouldn't feel comfortable putting this into a production pipeline.
+
+Ravi Mahankali: Thank you again. Your participation helps us understand how to improve Differential Privacy tools for developers.
+
+P1: Cheers.

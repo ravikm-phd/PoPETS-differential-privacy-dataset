@@ -1,0 +1,127 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P2 (Data Engineer, US, 10 Py. Yrs, 4 DS Yrs, Intermediate, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We're interested in understanding how developers use Differential Privacy libraries in practice. Today, you'll work on two data analysis tasks using one or more Differential Privacy libraries. I want you to think aloud as you work—verbalize your thoughts, questions, and decisions as you would if you were explaining your process to a colleague. There are no right or wrong answers; we're interested in your natural approach to solving these problems. You can use any resources you normally would: documentation, online search, Stack Overflow, AI coding assistants if that is your normal workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded for analysis. All data will be anonymized. Do you have any questions before we begin?
+
+P2: No, that all makes sense. Happy to help out.
+
+Ravi Mahankali: Great. Before we jump in, we have a quick demographic questionnaire. Let's cover your background. How many years of Python programming experience do you have? And how many years of data science or analytics experience?
+
+P2: I'm a Data Engineer working in the US. I've been writing Python for about 10 years now, mostly building out data pipelines and backend infrastructure. For data science and analytics specifically, I've been doing that for about 4 years.
+
+Ravi Mahankali: Thank you. And what is your prior experience with Differential Privacy, if any, and your familiarity with specific libraries like DiffPrivLib, PyDP, or OpenDP?
+
+P2: I'd say my experience is intermediate. I've done some coursework and tutorials on Differential Privacy, so I know the core concepts—epsilon, delta, global sensitivity, Laplace mechanisms. But I haven't actually deployed anything with it in a production setting. And I haven't used IBM DiffPrivLib, PyDP, or OpenDP before today.
+
+Ravi Mahankali: Okay. And finally, what is your typical development environment and tools, including AI assistants?
+
+P2: Typically, I use PyCharm or VS Code on my local Mac. I use standard virtual environments, Docker, Pandas, Polars. I occasionally use ChatGPT or GitHub Copilot for boilerplate or regex, but for standard data engineering I mostly just rely on official docs.
+
+Ravi Mahankali: Perfect. Let's get started. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon = 1.0. You can start with any of the three libraries we've discussed: IBM DiffPrivLib, PyDP, or OpenDP. You're expected to complete the tasks using all three libraries, using one at a time, in the order indicated on your handout. The dataset is already loaded in the session directory as adult.csv. Please think aloud as you work, and let me know when you've completed the task or if you have questions.
+
+P2: Alright, the handout says start with PyDP, then OpenDP, then DiffPrivLib. Let me get set up. You gave me this remote virtual machine with everything pre-installed, but honestly, for a 2-hour session, I'm much faster in my own local environment. I'm just going to try to pip install these locally first so I can use my own IDE shortcuts.
+
+P2: It's downloading the tarball. Waiting for the wheel to build... and there's a massive block of red text. Let me scroll up and read this.
+
+P2: Ah, okay. I couldn't even install it locally because it threw a C++ compiler error regarding an unsupported architecture. It looks like the PyBind11 C++ numeric extensions are failing on my Python 3.12 Mac environment.
+
+P2: Well, let me try installing OpenDP instead.
+
+P2: Okay, it's resolving dependencies... wait, why is it uninstalling pandas? Installing this forced a downgrade of pandas, which broke the rest of my machine learning pipeline. Yeah, no, I am definitely not doing this on my local machine. I'll just SSH into your remote VM.
+
+Ravi Mahankali: That's completely fine, the environment is provisioned exactly to avoid those kinds of dependency conflicts.
+
+P2: I'm in the VM. Let's open up a Jupyter notebook. Task A is to count the people making more than 50K with epsilon 1.0. Let's look at the dataset first.
+
+P2: Okay, the income column has strings, '<=50K' and '>50K'.
+
+P2: Since PyDP's install was a mess, I'm going to start with OpenDP inside the VM. Let me open the OpenDP documentation.
+
+P2: The OpenDP documentation leads with the core API... A practitioner might give up before finding the Polars integration. It dives straight into Domains, Metrics, Transformations, and Measurements. This is very theoretical. But I'll follow along.
+
+P2: It looks like I need to build a pipeline. Let's import the prelude.
+
+P2: Okay, I want to count the rows where income is '>50K'. I'll just filter it in Pandas first, that's way easier than trying to figure out how to filter inside an OpenDP transformation.
+
+P2: So the raw count is 7841. Now I just need to add Laplace noise to it. I'm looking at the OpenDP docs for a simple counting mechanism... I'm not entirely sure which approach I should use for a simple counting task.
+
+P2: Let me try to make a measurement directly. dp.m.make_laplace(scale=1.0). Let's try passing the integer length into it.
+
+P2: Error. It says DomainMismatch. Okay, it seems like OpenDP doesn't want me to just throw a random integer at a mechanism, it wants a full transformation pipeline starting from the actual data.
+
+P2: Let's build a transformation. The chaining syntax (>>) is unusual for Python. It reminds me of R.
+
+P2: Let's try that. Oh wait, my data is already a Pandas dataframe, not a raw CSV string. Let me just pass the target column as a list.
+
+P2: I need a transformation that just counts a list of strings. Let's look at make_count. It says it expects a vector domain.
+
+P2: Let's see if GitHub Copilot can auto-complete this pipeline for me.
+
+P2: Copilot suggested `trans = dp.t.make_count(TIA=str)` chained directly into `dp.m.make_laplace(scale=1.0)`. Let's test Copilot's suggestion.
+
+P2: Oh, an error. Copilot's suggestion failed! `make_count` returns an integer, but `make_laplace` expects a float. Copilot assumed standard Python dynamic typing where an integer can implicitly pass into a float mechanism, but OpenDP's Rust type system is strictly typed. This caught a type mismatch bug, but AI code completion gave me code that looks clean yet fails completely at runtime.
+
+P2: So I have to cast the output of the count to a float before I can add Laplace noise to it. Or I have to use a discrete mechanism. Let's look for a discrete Laplace mechanism. Ah, make_base_discrete_laplace. Let's try that.
+
+P2: Let's run it. Another error. It says it's deprecated and I should use make_laplace. But make_laplace wants a float. Juggling the functional chains, type casting, and budget math all at the same time is exhausting.
+
+P2: Okay, I will just do the type conversion manually in Pandas before I even touch OpenDP. I had to convert integers to floats explicitly, and the space_of declarations need to match exactly.
+
+P2: I will create a dummy column of floats. 1.0 if income is >50K, 0.0 otherwise.
+
+P2: Now I'll do a bounded sum instead of a count, since it's an array of floats.
+
+P2: Wait, error again. make_bounded_sum needs the size of the dataset to be known. This API is relentlessly pedantic. Let me use make_sized_bounded_sum.
+
+P2: It finally ran. 7842.1. Okay. That is the count of individuals earning more than $50k with an epsilon of 1.0. That took a ridiculous amount of trial and error with the type system.
+
+Ravi Mahankali: Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy. Again, you can start with any of the three libraries you prefer (in the order on your handout). Think aloud as you work through this problem.
+
+P2: Okay, average age by education level. So this is a GroupBy operation.
+
+P2: If I have to do a GroupBy using the OpenDP core API I was just struggling with... I'm going to have to manually iterate over every education level, slice the lists, create a sized bounded mean transformation for every group, and then I'll have to manually do the budget math to divide my epsilon by the number of groups. That sounds like a massive headache.
+
+P2: Let me look deeper into the OpenDP documentation. There has to be a better way for a Data Engineer to do this. I'm searching the docs for dataframe or groupby.
+
+P2: Wait a second. What is this? opendp.Context... Polars Integration? Oh my god. I love that I can just add.dp.sum() directly into my existing Polars lazy pipeline. Why is this buried so deep in the docs? This is exactly the kind of API I want.
+
+P2: I'm completely abandoning the core API approach. Let's rewrite this with Polars.
+
+P2: The documentation says I need to create a compositor context.
+
+P2: I really appreciate that the library tracks the total epsilon used automatically so I don't have to. Now I just construct the query like a normal Polars dataframe operation.
+
+P2: I want the average age grouped by education. I need to provide bounds for the age. I'll just assume ages are between 17 and 90 based on standard demographics.
+
+P2: Let's run it.
+
+P2: Wow. It just worked. It was incredibly easy to use their native DP-groupby function to get the averages across all education levels at once.
+
+P2: And looking at the results, the averages look completely correct. Bachelors is 38.8, Masters is 43.9. It didn't destroy the utility, which tells me the Polars integration is smart enough to use partition-aware composition under the hood instead of just blindly splitting my epsilon of 1.0 by 16 different groups. That is fantastic.
+
+P2: I'm done with Task B. That Polars integration completely redeemed OpenDP for me.
+
+Ravi Mahankali: Thank you for your participation. Before we finish, I'd like to ask a few brief questions:
+
+Ravi Mahankali: (1) Which library or libraries did you find easiest to use, and why?
+
+P2: Easiest to use, once I found it, was absolutely the OpenDP Polars integration. It completely abstracts away the low-level noise mechanisms and Rust type-casting nightmare. You just write your standard data engineering pipeline and slap .dp.mean() on the end of it. The core API, however, was easily the hardest thing I've touched today.
+
+Ravi Mahankali: (2) What was the most challenging aspect of completing these tasks?
+
+P2: Fighting the strict type system and cryptic Rust compiler errors in OpenDP's core API. Also, dealing with local installation failures for PyDP and OpenDP messing with my Pandas versions.
+
+Ravi Mahankali: (3) Did you feel confident that your implementations were correct and privacy-preserving?
+
+P2: For the Polars query, yes, absolutely. The context object is managing the budget, so I feel safe. For my first task where I was coercing data types and manually managing sizes and lists... honestly, no. I felt like I was fighting the library so much that I could easily have made a math error.
+
+Ravi Mahankali: (4) Is there anything you would have done differently if this were a real project?
+
+P2: I'd probably write up a team style guide strictly mandating the use of the Polars integration, and ban the use of the core API for standard analytics to prevent developers from making composition errors.
+
+Ravi Mahankali: Thank you again. Your participation helps us understand how to improve Differential Privacy tools for developers.
+
+P2: You're welcome. My experience confirms the theoretical promise of differential privacy is compelling, but the practical implementation challenges are significant. It's all about providing the right level of abstraction for the developer.

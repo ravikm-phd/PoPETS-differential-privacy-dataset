@@ -1,0 +1,60 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+DocumentationSearch,So PyDP. Introduction to PyDP,PyDP - 00:15,Starting documentation review
+InstallationAssumed,I have you already installed it I assume,Setup,Checking environment
+APIUnderstanding,The impression so far I've gotten is that PyDP seems to work where you create your own instantiated version of a statistical test and then you can pass it some data,PyDP - 00:15,Understanding API pattern
+ExampleCode,That is the whole page. What does the GitHub say?,PyDP Documentation,Looking for more examples
+DataExploration,I'm gonna have a quick look at the data set just to see how it is structured,Data Understanding,Exploring data format
+DataExploration,Aid work class oh. Not sure what does this number mean final weight,Data Understanding,Understanding columns
+DataExploration,"Big long, massive CSV",Data Understanding,Noting data size
+TaskSimplicity,"So just get all of the individuals who have more than 50K income. OK, that sounds really simple",Task 1 Understanding,Task seems simple
+PrivacyConceptLearning,"The function means that instead of getting the actual number, I will get the number with like a little bit of statistical fuzz",Task 1 Understanding,Understanding noise addition
+ExampleCodeComplexity,So these are actually all doing significantly more complicated things. It's nothing I need to do,PyDP Examples,Examples too complex
+ImportRequirements,"You have to manually import your different algorithms. Unless, which seems odd to me",PyDP API,Odd import structure
+ImportRequirements,Maybe they're just being explicit because it's a tutorial I wouldn't normally expect to have to import the thing and then also import all of its like separate algorithms,PyDP API,Import pattern unexpected
+ExampleCodeGap,Bounded sum sounds promising,PyDP API,Finding relevant function
+ExampleCodeComplexity,"They made a whole class and that's really cool, but it's so much more complicated than what I need",PyDP Examples,Examples overly complex
+ExampleCodeGap,"It would be nice to have an example that is slightly more complicated than this, but is slightly less complicated than this",PyDP Examples,Missing intermediate examples
+ExampleCodeGap,Like the baseline example in their repository is real simple and the first line. But then the full example jumps to a complete class structure. There's no middle ground,PyDP Examples,Gap between simple and complex
+EcosystemIntegration,Pandas is useful for reading CSVs. Do I need pandas? Does this not have the ability to?,PyDP - CSV Reading,No CSV reading capability
+EcosystemIntegration,"OK, so this doesn't have the ability to directly read CSVs, so I'm going to have to use another tool",PyDP - CSV Reading,Need pandas for CSV
+CopyPasteIssue,This is codes that do we not want to copy and paste,Technical Issues,Copy-paste problems
+CopyPasteIssue,"It might be something that, like Firefox High Security mode is breaking",Technical Issues,Browser security blocking paste
+ErrorOccurred,Data frame is not defined,Implementation,Error during coding
+ErrorOccurred,I appear to have done something wrong,Implementation,Debugging
+TypoIssue,Dyslexia strikes again,Implementation,Typo in code
+DataFormatDiscovery,So it's like income is not a number. Come has been bracketed as over or under 50K,Data Understanding,Discovering data format
+DataFormatDiscovery,How did I miss that when reading the CSV?,Data Understanding,Data format surprise
+TaskSimplicity,I just need the number of individuals whose income matches the string 50K. Which means this is actually more complicated than what I need,Task 1,Task reformulation
+APIDiscoverability,So I need account data type int,PyDP Implementation,Finding count function
+PrivacyParameterConfiguration,"Epsilon equals was one a normal. Yeah, one was like a normal value. That feels intuitive. It feels nice",PyDP Implementation,Epsilon value choice
+ErrorOccurred,Count is not defined,PyDP Implementation,Import error
+ImportRequirements,Do I need to do from Pi DP algorithms laplation import count,PyDP Implementation,Import discovery
+APIVerbosity,Having having DP and PD in the same... This is why they do that is because it's kind of annoying to write out this whole really verbose strength,PyDP vs Pandas,Understanding naming convention
+DataFormatIssue,The income column has a space before the brackets,Data Format,Whitespace issue
+DataFormatIssue,"If you are exactly concatenating less than or equal to 50K or greater than 50K, make sure you add a space",Data Format,Whitespace requirement
+ConfusionExpressed,Because this I'm not entirely sure what it's doing here. To be honest,PyDP Implementation,Code confusion
+ConfusionExpressed,I should maybe actually do some research,PyDP Implementation,Need more learning
+ConfusionExpressed,Was this even be something that PyDP is doing? Will this be something that pandas is doing?,PyDP vs Pandas,Attribution confusion
+TimeConstraint,I am taking a very long time,Implementation Progress,Time concern
+TimeConstraint,"If it looks like I'm not going to be able to finish the thing in the time, would you like me to sort of attempt something with one of the other libraries",Implementation Progress,Switching consideration
+ImplementationStruggle,"I'm just struggling with the actual like reading of a CSV which is not really, I don't think PyDP is like doing any of that",PyDP vs Pandas,CSV not PyDP issue
+PositiveFeedback,PyDP seems like fairly straightforward like this. This does what I want it to do,PyDP Assessment,PyDP logic clear
+LibrarySwitch,I'll try one of them. Just OK. What with PyDP. Open DP,Library Switch - 00:45,Switching to OpenDP
+FileNamingConflict,You may not be able to compile it directly if you're giving the same library name,OpenDP Setup,Naming conflict warning
+DocumentationSearch,Where can I find out how to use it? Installation documentation user guide OK. Features,OpenDP Documentation,Finding documentation
+MissingDocumentation,Not that helpful to me getting started. Why did it not load me on this page?,OpenDP Documentation,Documentation unhelpful
+MissingDocumentation,There's no review of open DP's Python APIs,OpenDP Documentation,Missing API overview
+AbstractConcepts,Find a metric space. Definition distance. Chain. Operators together OK invoke that measurement,OpenDP Concepts,Abstract terminology
+AbstractConcepts,This seems helpful because with the previous library you could still just call the private data if you wanted to,OpenDP vs PyDP,Comparing approaches
+PositiveFeedback,"I mean, I guess you could still do bad practise with this, but",OpenDP Design,Acknowledging safety design
+ExampleCodeGap,Show intermediate examples between simple and complex. Don't jump from trivial examples to full class implementations,Final Recommendations,Intermediate examples needed
+ClarityOfDocumentation,"Provide a clear review of Python APIs. Explain not just what functions do, but when to use them",Final Recommendations,Better documentation
+GettingStartedGuide,"The documentation should help you get started, not just provide API reference. Show me the 'happy path' first",Final Recommendations,Better getting started
+ImportRequirements,Don't require manual imports of separate algorithms. Make the API more intuitive,Final Recommendations,Simpler imports
+EcosystemIntegration,"If the library needs pandas for CSV reading, document that clearly",Final Recommendations,Clear dependencies
+DocumentationStructure,Organize documentation better. Make it clear where to find what you need,Final Recommendations,Better organization
+OverallAssessment,"PyDP was more approachable conceptually, but the examples and documentation structure made it harder to use than it should be",Final Summary,PyDP assessment
+LearningCurveTooSteep,OpenDP seems powerful but the learning curve is very steep - the documentation doesn't help you get started,Final Summary,OpenDP complexity
+AbstractConcepts,The concepts are too abstract,Final Summary,Abstraction problem
+TimeWasted,I spent a lot of time struggling with CSV reading,Final Summary,Time on non-DP issues
+EndToEndExamples,It shows how important it is to have clear examples that work end-to-end,Final Summary,Complete examples needed

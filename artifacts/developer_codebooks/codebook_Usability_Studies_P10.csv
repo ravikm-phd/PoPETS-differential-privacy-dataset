@@ -1,0 +1,65 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+LackOfKnowledge,"I've never used differential privacy before, but I understand the basic concept from the handout",Session Start,Developer has conceptual but not practical knowledge
+LackOfKnowledge,We're adding noise to protect individual privacy while still getting useful aggregate statistics,Session Start,Basic understanding articulated
+InstallationSuccess,diffprivlib and opendp installed successfully,Installation,Successful installation of two libraries
+PackageNaming,"It's installing a bunch of unrelated packages - face recognition, keras, chess... This doesn't look right at all",Installing PyDP,Wrong package being installed
+PackageNaming,This pydp package seems to be something completely different - it's installing facial recognition libraries,Installing PyDP,Package name collision
+PackageDiscovery,Let me search online for 'PyDP differential privacy install',Installing PyDP,External search needed
+PackageNaming,It says the package should be called 'python-dp' on PyPI,Installing PyDP,Inconsistent naming discovered
+BuildIssues,The python-dp package version 0.1.0 doesn't seem to be the right one,Installing PyDP,Version mismatch
+PackageNaming,Why isn't the package name consistent with what's documented? This is a major discoverability issue,Installing PyDP,Naming inconsistency criticized
+InstallationRetry,Let me try installing from GitHub directly,Installing PyDP,Attempting alternative installation
+BuildIssues,That's failing too - network access to GitHub is restricted,Installing PyDP,Network restrictions block installation
+AdoptionBarrier,"This is a significant barrier for adoption - if developers can't even install the library through standard pip, many will just give up",Installing PyDP,Installation as adoption barrier
+LibraryAbandonment,Let's proceed with the two libraries that are working,Installing PyDP,Abandoning problematic library
+MissingVersionAttribute,OpenDP doesn't have a __version__ attribute. That's minor but slightly annoying,OpenDP Check,Missing Python convention
+PrivacyParameterConfiguration,What epsilon should I use? Is 1.0 reasonable? What are the implications?,Data Exploration,Uncertainty about parameter choice
+PrivacyParameterConfiguration,The concept of 'privacy budget' is intuitive but choosing the actual value seems quite arbitrary without domain expertise,Data Exploration,Parameter selection challenge
+APIDiscoverability,"There's no direct 'count' function, but I see 'count_nonzero' and 'sum'",DiffPrivLib Task 1,Missing expected function
+WorkaroundRequired,"For counting people with income >50K, I could create a binary column and then sum it up. That's a reasonable workaround",DiffPrivLib Task 1,Developer devises workaround
+ImplementationSuccess,It works!,DiffPrivLib Task 1,Successful implementation
+WarningHelpfulness,PrivacyLeakWarning: Bounds have not been specified... This is interesting,DiffPrivLib Task 1,Warning about privacy leakage
+BoundsConfiguration,"For a binary column, the bounds should be [0, 1]. Let me fix that",DiffPrivLib Task 1,Understanding bounds requirement
+ImplementationSuccess,"No warning this time! The result is approximately 7842, which is very close to the actual 7841",DiffPrivLib Task 1,Successful with correct parameters
+WarningHelpfulness,The warning is helpful - it tells me I'm doing something wrong,DiffPrivLib Task 1,Positive feedback on warning
+MissingDocumentation,It would be even more helpful if the documentation emphasized this upfront. I had to discover this through trial and error,DiffPrivLib Task 1,Documentation gap noted
+WarningClarity,The warning mentions 'additional privacy leakage' but doesn't quantify how much,DiffPrivLib Task 1,Warning lacks detail
+LearningCurveTooSteep,"For someone new to differential privacy, understanding the severity of this leakage is challenging",DiffPrivLib Task 1,Difficulty understanding implications
+PositiveFeedback,That was relatively straightforward once I figured out to use sum instead of count,DiffPrivLib Task 1,Positive assessment after workaround
+AbstractConcepts,"The terminology is more abstract - 'domains', 'metrics', 'transformations', 'measurements'",OpenDP Introduction,Unfamiliar terminology
+FeatureEnabling,I need to enable 'contrib' feature to use certain functions,OpenDP Task 1,Feature flags required
+MentalModelMismatch,"I expected make_count to sum up the 1s, but it's just counting total elements",OpenDP Task 1,Expectation vs behavior mismatch
+MentalModelMismatch,"The make_count function counts ALL elements in the vector, regardless of their value",OpenDP Task 1,Count doesn't filter
+WorkaroundRequired,"I need to use make_sum instead, similar to DiffPrivLib",OpenDP Task 1,Same workaround needed
+ErrorMessagesUnhelpful,Dataset size must be known. Either specify size in the input domain or use make_resize,OpenDP Task 2,Cryptic error message
+ErrorMessagesUnhelpful,The error says to 'specify size' but doesn't show how,OpenDP Task 2,Error lacks guidance
+ManualImplementation,OpenDP doesn't have a direct make_mean for unknown-size datasets. I'll need to compute sum/count manually,OpenDP Task 2,Manual mean calculation required
+SensitivityCalculation,"For mean, I need to split epsilon between sum and count operations",OpenDP Task 2,Manual budget splitting
+APIVerbosity,"DiffPrivLib: 3-4 lines, OpenDP: 15-20 lines for the same task",API Comparison,Significant verbosity difference
+APIComparison,"OpenDP requires explicit domain and metric definitions, type specifications, and transformation chains",API Comparison,More explicit requirements
+AbstractConcepts,OpenDP's approach is more rigorous but also more intimidating,API Comparison,Rigor vs accessibility
+LearningCurveTooSteep,The terminology barrier is significant for OpenDP,API Comparison,Terminology as barrier
+ErrorMessagesUnhelpful,"When I saw OpenDP errors mentioning 'MakeTransformation' and internal types, it felt like I was looking at library internals",Error Messages,Rust internals exposed
+ErrorMessagesUnhelpful,The Rust error formatting was jarring in a Python context,Error Messages,Python-unfriendly errors
+MissingDocumentation,Both libraries need more beginner-friendly tutorials,Documentation Needs,Tutorials needed
+ExampleCode,Example code for common use cases would be invaluable,Documentation Needs,Examples needed
+PrivacyParameterGuidance,Neither provides guidance on choosing epsilon values,Documentation Needs,Missing parameter guidance
+PrivacyParameterGuidance,What epsilon should I use? What are the tradeoffs? How do I handle composition?,Documentation Needs,Fundamental questions unanswered
+BudgetManagement,DiffPrivLib has BudgetAccountant but usage isn't obvious,Budget Management,Budget tracking unclear
+BudgetManagement,OpenDP's composition is built into the chain design but complex to understand,Budget Management,Complex composition
+CompositionAwareness,I'm still not clear on whether my multiple queries consumed 16x epsilon or if there's automatic composition happening,Budget Management,Composition uncertainty
+CompositionAwareness,This is critical for real-world applications where privacy guarantees matter,Budget Management,Composition matters for production
+OverallAssessment,"For my current skill level and typical data analysis tasks, I'd choose DiffPrivLib",Library Choice,DiffPrivLib preferred
+OverallAssessment,It's more accessible and gets the job done with less code,Library Choice,Accessibility matters
+OverallAssessment,OpenDP seems more powerful and might be better for production systems where I need fine-grained control,Library Choice,OpenDP for advanced use
+LearningCurveTooSteep,The learning curve is significant,Library Choice,OpenDP complexity noted
+PrivacyConcern,Neither makes it obvious when I'm making mistakes that could compromise privacy,Privacy Concerns,Silent failures concern
+PrivacyConcern,I imagine there are other subtle issues that wouldn't trigger warnings,Privacy Concerns,Hidden privacy risks
+BuildIssues,Installation issues - PyDP was impossible to install through standard methods,Final Thoughts,Installation barrier
+PrivacyParameterGuidance,"Parameter guidance - No help on choosing epsilon, delta, or bounds",Final Thoughts,Missing guidance
+MentalModelMismatch,Mental model mismatches - Functions don't always do what their names suggest (count vs sum of binary),Final Thoughts,Naming confusion
+ErrorMessagesUnhelpful,Error messages - Technical errors that don't help users understand or fix issues,Final Thoughts,Poor error messages
+MissingDocumentation,Documentation gaps - Lack of beginner-friendly tutorials and real-world examples,Final Thoughts,Documentation gaps
+CompositionAwareness,Privacy budget confusion - Unclear how composition works for multiple queries,Final Thoughts,Composition unclear
+AdoptionBarrier,"For differential privacy to be widely adopted, these libraries need to be more accessible",Final Thoughts,Accessibility needed
+LearningCurveTooSteep,"Right now, they feel like they're designed for experts who already understand differential privacy deeply",Final Thoughts,Expert-oriented design

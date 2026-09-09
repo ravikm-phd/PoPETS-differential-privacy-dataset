@@ -1,0 +1,85 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+LackOfKnowledge,I've heard a lot about differential privacy but never actually implemented it,Session Start,Developer lacks practical DP experience
+BackgroundMismatch,My background is mostly in standard data science work with Pandas and Scikit-Learn,Session Start,Data science background without privacy experience
+NonPrivateComparison,"In regular Pandas, I'd just do df[df['income'] == '>50K'].shape[0] or use value_counts(). Simple stuff",Task Understanding ,Familiar non-private approach
+LibraryExpectation,"I read that it mimics Scikit-Learn and NumPy, which sounds familiar",IBM DiffPrivLib,Expectation of familiar API
+APIMisuse,TypeError: count_nonzero() got an unexpected keyword argument 'epsilon',IBM DiffPrivLib Task A,Wrong function usage
+HowShouldIUseThis,I thought the whole point of the tools module was to provide DP versions of NumPy functions?,IBM DiffPrivLib Task A,Confusion about API design
+MissingDocumentation,I don't actually see count_nonzero listed as a main DP function,IBM DiffPrivLib Task A,Function availability unclear
+FrustrationExpressed,This is frustrating. I just want to count things. That's literally the simplest statistical operation,IBM DiffPrivLib Task A,Basic operation missing
+WorkaroundRequired,"A count is really just a sum of ones, right? Or I could use a histogram",IBM DiffPrivLib Task A,Developer devises workaround
+TypeConversionRequired,"Right, histograms work with numbers, not strings. The income column has string values",IBM DiffPrivLib Task A,String data incompatibility
+TypeConversionRequired,So I need to convert the categorical variable to numeric first. This is already more work than I expected,IBM DiffPrivLib Task A,Extra conversion work
+PrivacyWarning,PrivacyLeakWarning: Range parameter has not been specified. This will result in additional privacy leakage,IBM DiffPrivLib Task A,Warning about privacy leak
+PrivacyConceptLearning,'Privacy leakage'? That sounds really bad. What does this mean exactly?,IBM DiffPrivLib Task A,Learning from warning
+PrivacyConceptLearning,"Even though the range is 'obvious' to me as a human, the library doesn't know that",IBM DiffPrivLib Task A,Understanding privacy leak concept
+PrivacyConceptLearning,"If it computes min/max from the data, that computation itself could reveal something about individuals",IBM DiffPrivLib Task A,Grasping subtle privacy point
+BoundsConfiguration,"To do this 'correctly', I need to specify the range explicitly",IBM DiffPrivLib Task A,Learning bounds requirement
+OutputTypeConfusion,Why is it a float? You can't have 0.91234 of a person,IBM DiffPrivLib Task A,Confusion about noisy output
+ImplementationSuccess,"I guess that's the noise? So the actual count might be 11,687 or 11,688",IBM DiffPrivLib Task A,Understanding noisy results
+CognitiveOverhead,"This was more complicated than I expected... For someone who just wants to 'add privacy' to their existing Pandas workflow, this is a lot of cognitive overhead",IBM DiffPrivLib Task A,Summarizing complexity
+GroupByMissing,Searching the documentation for 'groupby'... I'm not finding anything,IBM DiffPrivLib Task B,Missing groupby functionality
+GroupByMissing,This is concerning. GroupBy is like the most fundamental operation in data analysis,IBM DiffPrivLib Task B,Critical feature missing
+WorkaroundRequired,"So if I want means by education level, I'd have to loop through each education level and compute the mean separately?",IBM DiffPrivLib Task B,Manual loop workaround
+BudgetManagement,I'm already worried about the privacy budget implications,IBM DiffPrivLib Task B,Budget concern
+CompositionAwareness,"I'm running dp_tools.mean 16 times, each with epsilon=1.0. Doesn't the privacy budget accumulate?",IBM DiffPrivLib Task B,Discovering composition issue
+CompositionAwareness,"If I run 16 queries each with epsilon=1.0, my total privacy loss would be 16.0, not 1.0",IBM DiffPrivLib Task B,Understanding composition
+BudgetSplitting,I guess I need to divide my epsilon by the number of groups? So epsilon_per_group = 1.0 / 16 = 0.0625,IBM DiffPrivLib Task B,Attempting budget split
+UtilityProblem,"The results are terrible. For 'Preschool', the average age is 243.7. For 'Doctorate', it's -45.2",IBM DiffPrivLib Task B,Nonsensical noisy results
+UtilityProblem,The noise is completely overwhelming the signal because epsilon is so small,IBM DiffPrivLib Task B,Noise dominates signal
+CompositionAwareness,"If I'm computing means on disjoint subsets, shouldn't I be able to use parallel composition?",IBM DiffPrivLib Task B,Recognizing parallel composition
+TypeStrictness,TypeError: Incompatible function arguments. The function expects specific types,PyDP Task A,Strict type requirements
+TypeConversionRequired,"This is a C++ wrapper, so it probably expects specific C++ types",PyDP Task A,Understanding C++ wrapper
+TypeConversionRequired,Does Count only work with numeric data?,PyDP Task A,Numeric limitation question
+MentalModelMismatch,The Count algorithm just counts how many elements are in the list. It doesn't count how many elements satisfy a condition,PyDP Task A,Count behavior mismatch
+MentalModelMismatch,I need to filter the list first and then pass the filtered list to Count,PyDP Task A,Required preprocessing
+MentalModelMismatch,PyDP isn't really a 'query engine' - it's more like a 'noise adder',PyDP Task A,Library paradigm understood
+WorkaroundRequired,"Instead of Count, I could use BoundedSum. If I treat high income as 1 and low income as 0, then the sum equals the count",PyDP Task A,Sum as count workaround
+WorkaroundRequired,I had to realize that Sum with binary values equals Count. That's not obvious,PyDP Task A,Non-obvious workaround
+BoundsParadox,"I need bounds to use the algorithm, but I can't safely look at the data to determine the bounds",PyDP Task B,Bounds paradox
+BoundsParadox,I have to rely on domain knowledge or make assumptions,PyDP Task B,Domain knowledge required
+BoundsImpact,"If my bounds are too wide... Wider bounds mean higher sensitivity, which means more noise",PyDP Task B,Understanding bounds-noise relationship
+BoundsParadox,Using 0-100 when the actual range is maybe 17-90 means I'm adding more noise than necessary. But using 17-90 would require looking at the data. There's no good solution here,PyDP Task B,No good solution
+MissingDocumentation,This is really sparse documentation. It mentions 'pre-aggregation' and 'partition selection' but doesn't give clear examples,PyDP Task B,Documentation gaps
+AbstractConcepts,'Contribution bounding' and 'per-partition contributions'. This is getting into territory I don't understand,PyDP Task B,Unfamiliar concepts
+LowLevelAPI,It feels very low-level. It's like I'm writing a wrapper around a C++ math library rather than doing data analysis,PyDP Summary,Low-level library feel
+TypeStrictness,The strict typing is annoying for Python - I'm used to duck typing and flexible data structures,PyDP Summary,Python flexibility missing
+EcosystemIntegration,The lack of DataFrame integration means I'm constantly converting between Pandas and lists,PyDP Summary,Poor ecosystem integration
+MissingDocumentation,The documentation is also quite sparse. I couldn't figure out how to use the partition selection features,PyDP Summary,Documentation gaps
+AbstractConcepts,"input_domain, input_metric. What are these?",OpenDP Core,Unfamiliar parameters
+AbstractConcepts,I have no idea what any of these mean. I just have a CSV file with some columns,OpenDP Core,Conceptual gap
+FunctionalProgrammingStyle,This is a completely different paradigm. It's like functional programming with type annotations,OpenDP Core,Different programming paradigm
+LearningCurveTooSteep,"For someone who just wants to count some records, this is incredibly complex",OpenDP Core,Excessive complexity
+ErrorMessagesUnhelpful,"Error: type mismatch: expected i32, found String. It seems like make_count expects integer types",OpenDP Core,Rust-style error messages
+ErrorMessagesUnhelpful,The error message is even more cryptic because it's talking about Rust types (i32),OpenDP Core,Rust internals exposed
+TimeWasted,I've been at this for 10 minutes and I haven't successfully run a single query,OpenDP Core,Time wasted on core API
+PolarsIntegration,'opendp.extras.polars' in the documentation sidebar. Does OpenDP have special integration with Polars?,OpenDP Polars,Discovering Polars integration
+PolarsIntegration,"This looks completely different! There's a Context object that takes a LazyFrame, privacy_unit, and privacy_loss",OpenDP Polars,Better API discovered
+BudgetManagement,"I'm defining a Context with my data, specifying that each individual contributes at most 1 record, and setting my total privacy budget",OpenDP Polars,Automatic budget setup
+ImplementationSuccess,Running this... It works! Result: 11690,OpenDP Polars,Successful query
+ImplementationSuccess,I just filtered on a string column and it worked! I didn't have to convert to numeric,OpenDP Polars,String handling works
+HighLevelAPISuccess,I didn't have to specify bounds or ranges. The len() function apparently knows how to handle counting,OpenDP Polars,Automatic parameter handling
+HighLevelAPISuccess,This is a huge improvement over the other libraries,OpenDP Polars,Major improvement noted
+GroupBySupport,query_mean = context.query().group_by('education').agg(pl.col('age').mean()),OpenDP Polars,GroupBy works
+ImplementationSuccess,Running this... It works! I get a Polars DataFrame with education levels and their mean ages,OpenDP Polars,Grouped mean works
+AutomaticPartitionSelection,"'Preschool' and the other missing groups probably have very few records, and releasing their mean ages could potentially identify individuals",OpenDP Polars,Understanding stable keys
+AutomaticPartitionSelection,OpenDP automatically suppresses these unsafe groups,OpenDP Polars,Automatic safety
+PositiveFeedback,"That's actually really smart! With IBM and PyDP, I got nonsensical results for small groups. OpenDP just doesn't return them",OpenDP Polars,Praising partition selection
+AutomaticPartitionSelection,It's 'implicit safety' - the library is protecting me from releasing potentially identifying information,OpenDP Polars,Safety appreciated
+AutomaticBudgetManagement,I didn't have to manually loop through groups or split the privacy budget. The group_by operation handled all of that internally,OpenDP Polars,Automatic handling praised
+AutomaticBudgetManagement,It must be applying parallel composition automatically because the groups are disjoint,OpenDP Polars,Parallel composition automatic
+BudgetEnforcement,"If I try to run too many queries, it should stop me... Eventually, I get an error: insufficient privacy budget remaining",OpenDP Polars,Budget enforcement works
+AutomaticBudgetManagement,This is exactly what I wanted! The library manages the budget for me,OpenDP Polars,Automatic budget praised
+OverallAssessment,The core API with domains and metrics was completely impenetrable. I couldn't figure out how to do anything with it,OpenDP Summary,Core API inaccessible
+PositiveFeedback,But the Polars integration is fantastic,OpenDP Summary,Polars integration praised
+DiscoverabilityIssue,"If I hadn't stumbled upon the Polars integration, I would have given up on OpenDP entirely",OpenDP Summary,Discovery problem
+DiscoverabilityIssue,The core API is not designed for someone like me,OpenDP Summary,Target audience mismatch
+OverallAssessment,OpenDP with Polars is clearly the best option for someone who wants to do real data analysis with differential privacy,OpenDP Summary,Best library identified
+GroupByMissing,"For all three libraries, the biggest pain point was the grouped aggregation. Only OpenDP handles it well",Final Summary,GroupBy as main pain point
+BoundsParadox,"All libraries require bounds for mean/sum operations, but none provide a safe way to estimate them from the data",Final Summary,Bounds paradox universal
+TypeConversionRequired,All libraries struggle with categorical/string data. They're all designed around numeric operations,Final Summary,String handling problem universal
+AdoptionBarrier,These libraries are designed by privacy Researchers for privacy Researchers. They expose the mathematical primitives rather than the data analysis primitives,Final Summary,Expert-oriented design
+IdealAPI,"Ideally, I'd want something like: df.dp.groupby('education')['age'].mean(epsilon=1.0). Just add .dp to my existing Pandas code",Final Summary,Ideal API described
+AdoptionBarrier,"Until we get there, differential privacy will remain a niche technology used only by specialists",Final Summary,Adoption barrier noted
+OverallAssessment,1. OpenDP (with Polars) - Best overall. 2. IBM DiffPrivLib - Second place. 3. PyDP - Third place,Final Ranking,Library ranking
+OverallAssessment,"If we're talking about the core OpenDP API, it would be last place - I couldn't accomplish anything with it",Final Ranking,Core API worst

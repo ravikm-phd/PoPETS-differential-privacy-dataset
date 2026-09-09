@@ -1,0 +1,83 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P16 (Privacy Engineer, US, 15 Py. Yrs, 13 DS Yrs, Experienced, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P16: Sounds good. I'm ready to begin.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P16: I have 15 years of Python experience and about 13 years of data science and privacy engineering experience in industry.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with OpenDP, IBM DiffPrivLib, or PyDP specifically?
+
+P16: I'm quite experienced with Differential Privacy conceptually and practically. I work on privacy-preserving data infrastructure at my company, designing DP mechanisms and reviewing privacy budgets. I'm familiar with formal privacy definitions, sequential and parallel composition, and Laplace/Gaussian mechanisms. I've read papers on OpenDP and IBM DiffPrivLib, but I haven't used them extensively for day-to-day scripting on raw DataFrames.
+
+Ravi Mahankali: Excellent. What does your typical development environment look like?
+
+P16: VS Code and Jupyter notebooks in Linux/macOS environments, primarily working with pandas, NumPy, and standard data science libraries.
+
+Ravi Mahankali: Great. Let's move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with total budget epsilon equal to 1.0. You are expected to complete this task using all three libraries in the designated order: OpenDP first, then IBM DiffPrivLib, then PyDP. The dataset is loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P16: Got it. I will be opening VS Code, and then loading `adult.csv` in pandas, and inspecting the columns.
+
+P16: The dataset has 32,561 rows. The `income` column has 7,841 rows matching `>50K`. That's our ground truth count. Now I'll implement Task A starting with OpenDP.
+
+P16: OpenDP uses pipeline chaining with transformations and measurements. Since I want to count matching records under epsilon = 1.0, I need to construct a domain and metric, then chain a `make_count` transformation into a Laplace measurement.
+
+P16: OpenDP returned 7844. The pipeline execution is clean once the typing is explicit. Now let's try IBM DiffPrivLib for Task A.
+
+P16: In IBM DiffPrivLib, I'll use the `Laplace` mechanism directly or `diffprivlib.tools.count_nonzero`. Let me test `count_nonzero` on a boolean mask first.
+
+P16: `count_nonzero()` in DiffPrivLib doesn't take `epsilon` directly in this signature. Let me drop down to the `Laplace` mechanism in `diffprivlib.mechanisms`.
+
+P16: Returned 7839. That worked. Now moving to PyDP for Task A.
+
+P16: In PyDP, I'll use `pydp.algorithms.laplacian.Count`.
+
+P16: PyDP returned 7837. Task A is complete across all three libraries.
+
+Ravi Mahankali: Excellent. Now let's move to Task B. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work.
+
+P16: Task B is a grouped aggregation across 16 unique education categories.
+
+P16: As a privacy engineer, the first thing I think about here is composition. We have 16 distinct education levels: Bachelors, HS-grad, Masters, Doctorate, etc. Since each row in the dataset belongs to exactly one education category, the subsets are completely disjoint partitions of the data.
+
+P16: Because the groups are disjoint, parallel composition applies! Under parallel composition, the overall privacy loss is the maximum privacy loss across any single partition, not the sum. So if I compute a DP mean for each education category with epsilon = 1.0, the total privacy consumption across the entire dataset is still exactly epsilon = 1.0.
+
+P16: Let's see how the libraries handle this. I'll start by attempting a grouped mean in IBM DiffPrivLib.
+
+P16: Looking for pandas DataFrame groupby integration in DiffPrivLib... It doesn't exist. There's no `df.groupby('education').mean()` equivalent in DiffPrivLib or PyDP or OpenDP.
+
+P16: So I have to write a manual Python loop over each unique education level. Let me write the loop in DiffPrivLib first.
+
+P16: If I pass `epsilon=1.0` inside the loop for each group, the results look reasonable ('Bachelors': 38.89, 'HS-grad': 38.92, 'Doctorate': 47.45). But look at what happens if I attach DiffPrivLib's `BudgetAccountant` or if I use a privacy accountant to track budget: DiffPrivLib doesn't know that the groups are disjoint! It just sees 16 function calls. If an accountant is active, it treats each call sequentially and adds up the budget, claiming I spent 16 * 1.0 = 16.0 privacy budget!
+
+P16: And if a developer gets scared by sequential composition and splits the total budget into `1.0 / 16 = 0.0625` per group:
+
+P16: Look at the results with epsilon = 0.0625: small groups like 'Preschool' and 1st-4th grade get completely destroyed by noise — returning numbers like -45.2 or 180.5!
+
+P16: This is a major structural flaw in all current DP libraries. Grouping is like 80% of real data analysis. Developers recognize that parallel composition should apply since groups are disjoint, but DiffPrivLib doesn't know that — it just sees 16 function calls. PyDP and OpenDP manual loops have the exact same problem. It is not enough to say 'add a groupby helper' — the helper must encode parallel composition correctly! Without a native groupby helper that structurally encodes parallel composition, the system either forces unnecessary budget splitting that ruins utility, or forces the developer to manually bypass privacy accountants.
+
+P16: Let me test PyDP for Task B as well.
+
+P16: PyDP executes the loop and returns private means per group, but again, PyDP has no built-in notion of DataFrame partitions or parallel composition across iterations.
+
+Ravi Mahankali: Now, regarding the privacy budget choices: for both tasks, you chose epsilon = 1.0. How would you justify your choice of epsilon = 1.0 if a hypothetical reviewer, auditor, or security board asked why you picked 1.0 instead of 0.1 or 5.0?
+
+P16: That's a fundamental question. In my work as a privacy engineer, I make confident choices like picking epsilon = 1.0 because 1.0 is standard practice in privacy research benchmarks and provides a reasonable balance between noise scale and accuracy for datasets of this size. But if a reviewer asks me to formally justify why 1.0 is the exact right privacy guarantee for this specific dataset — rather than 0.5 or 2.0 — I can't give a formal mathematical defense. We can calculate the worst-case privacy loss bound exp(epsilon) = 2.718, but translating that mathematical bound into a tangible real-world risk statement for an auditor or reviewer remains an unsolved challenge. Even experienced privacy practitioners struggle to justify specific epsilon numbers to outside reviewers because the tooling provides no contextual risk calibration.
+
+Ravi Mahankali: Thank you — that concludes the coding tasks. Let's do a short debrief. Overall, how would you compare the usability of OpenDP, IBM DiffPrivLib, and PyDP?
+
+P16: OpenDP has the most formal foundation with its measurement and transformation graph, but its error messages and steep learning curve make simple exploratory analysis cumbersome. DiffPrivLib is the most idiomatic for Python users because of its NumPy-style tools, but its budget accounting lacks awareness of parallel composition. PyDP is clean for simple mechanism calls, but missing high-level DataFrame integrations.
+
+Ravi Mahankali: What is the single biggest improvement DP library maintainers should focus on?
+
+P16: Native DataFrame groupby support that structurally understands and applies parallel composition. Grouping data into disjoint partitions is fundamental to data analysis, and libraries must support it natively without forcing sequential budget accumulation or manual workarounds.
+
+Ravi Mahankali: Thank you very much for your time and feedback.
+
+P16: Thanks and good luck to you!

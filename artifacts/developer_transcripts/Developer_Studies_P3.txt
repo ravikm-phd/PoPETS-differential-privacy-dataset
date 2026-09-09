@@ -1,0 +1,127 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P3 (Data Analyst, US, 6 Py. Yrs, 2 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P3: No questions. Let's start.
+
+Ravi Mahankali: Excellent. So just to confirm your background for the recording, what is your current role and how many years of Python and data science experience do you have? 
+
+P3: I'm a Data Analyst in the US, working in the industry sector. I have about 6 years of Python programming experience, and 2 years specifically in data science and analytics. 
+
+Ravi Mahankali: Great. And did you have any prior experience with Differential Privacy before this session? 
+
+P3: No, I should mention that I've never worked with differential privacy before. I understand the basic idea of adding noise to protect individual privacy... but I haven't actually implemented anything with these specific libraries yet. 
+
+Ravi Mahankali: That is perfectly fine. Today, you’ll work on two data analysis tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon = 1.0. The dataset is already loaded as adult.csv. You can start with any of the three libraries: IBM DiffPrivLib, PyDP, or OpenDP. Please think aloud as you work. You can begin whenever you are ready.
+
+P3: Alright, let's get into it. I'll probably start with IBM DiffPrivLib. I'll just open up a new Python script here... let's call it `dp_task1.py`. First things first, I need to read the data. 
+
+P3: Let me just type `import pandas as pd`. And `df = pd.read_csv('adult.csv')`. Let's just print the head to see what the columns look like. Uh, okay, so the column is called 'income' and the values are '<=50K' and '>50K'. Okay, simple enough. 
+
+P3: So I need to calculate the number of people making more than 50K. Let me pull up the IBM DiffPrivLib documentation in my browser. I'm looking for a count function. I'll check diffprivlib.tools... I don't see count or count_nonzero in the main tools list. 
+
+P3: That's a bit strange. I see a sum function. Let me check if there's a specific way to do conditional counts. Let me search the docs for "count". Okay, there is `count_nonzero` somewhere in here. Let me try importing that. `from diffprivlib.tools import count_nonzero`. 
+
+P3: Now, I want to filter the dataframe first. Let me create a boolean mask. `mask = df['income'] == '>50K'`. Now I'll pass this mask into `count_nonzero` with the epsilon. `result = count_nonzero(mask, epsilon=1.0)`. Let's run that.
+
+P3: Oh, an error. Error: TypeError: count_nonzero() got an unexpected keyword argument 'epsilon'. Wait, what? This is a differential privacy library, how does the function not accept an epsilon parameter? Let me go back to the docs.
+
+P3: Ah, I see. The documentation says this is because some features haven't been fully vetted for privacy guarantees. This is actually reassuring... but it means I can't use this function for my task. 
+
+P3: Let's see how else I can do this. The example code only shows how to use this with synthetic arrays, not real-world Pandas dataframes. I need to count rows that match my condition. The high-level tools don't seem to work for this specific use case. 
+
+P3: Let me look at the mechanisms directly. There are 'mechanisms' that are the raw differential privacy building blocks. I see there's a `Laplace` mechanism here. 
+
+P3: Let me think about this mathematically. If I'm just counting people, the sensitivity of a count query should just be 1, right? One person can only change the count by 1. So if I just calculate the real count using pandas, and then add Laplace noise with sensitivity 1, that should be differentially private.
+
+P3: Let me code that. `actual_count = len(df[df['income'] == '>50K'])`. And then `from diffprivlib.mechanisms import Laplace`. `laplace = Laplace(epsilon=1.0, sensitivity=1)`. Then `dp_count = laplace.randomise(actual_count)`. 
+
+P3: Let me print the result. Okay, it gave me a number, 7842.1. So it worked. But I'm not 100% sure if this is the right way. The library has a tools.count function, so maybe there's a better way? But I feel like I'm working around the library rather than using it as intended. WORKAROUND COMMENT: I'm using a histogram function when I really just need a simple count. Well, in this case, I'm bypassing the tools entirely and using the raw math mechanism. It feels like a workaround. 
+
+Ravi Mahankali: That's great, thank you for voicing your thought process. If you feel you've completed Task A, we can move on to Task B. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy. You can continue using this library or try another one.
+
+P3: Okay, average age by education level. That's a groupby operation followed by a mean. I'll stick with DiffPrivLib for a second to see if they have a groupby. 
+
+P3: Let me go back to the documentation. Searching the documentation for groupby... I'm not finding anything... How can a data privacy library not support it?. This is like, the most common data analysis operation. 
+
+P3: Okay, if there is no native groupby helper, I guess I have to write a manual loop over the unique group keys. Let me get the unique education levels. `education_levels = df['education'].unique()`. 
+
+P3: So I'll write a `for` loop. `for edu in education_levels:`. Inside the loop, I'll filter the dataframe: `subset = df[df['education'] == edu]['age']`. And then I'll use `diffprivlib.tools.mean` on that subset. 
+
+P3: Wait, hold on a second. I need to think about the privacy budget. The composition rules are left to the user to implement correctly. If I run this 16 times with epsilon=1.0, isn't my total privacy loss 16.0?. 
+
+P3: Yeah, that doesn't seem right. I had to manually implement the composition by splitting epsilon. There are 16 unique education levels. So I need to divide my budget. With 16 education levels in the Adult dataset, my epsilon per group becomes 1.0/16 = 0.0625, which adds a LOT of noise. 
+
+P3: Let me update my loop. `eps_per_group = 1.0 / len(education_levels)`. Now I'll call the mean function. `dp_mean = diffprivlib.tools.mean(subset, epsilon=eps_per_group)`.
+
+P3: Let me run this. Uh oh, I'm getting an error about bounds. The documentation mentions I need to specify bounds for the data. 
+
+P3: Okay, it needs an upper and lower bound for the age to calculate sensitivity. I had to guess the age bounds (17--90)... The library doesn't help me determine appropriate bounds from the data in a privacy-preserving way. If I just look at the dataset min and max, I might be violating privacy. So I'll just hardcode 0 and 100 to be safe. `bounds=(0, 100)`.
+
+P3: Let's run it again. Okay, it's printing out the results now. Let me look at these numbers. 
+
+P3: Wow. These numbers are completely unusable. For 'Preschool', the average age is 243.7. For 'Doctorate', it's -45.2. QUALITY CONCERN: The error is massive!... the noise completely overwhelms the signal. 
+
+P3: Every time I run the script, the average age jumps around by 5 years. I know it's noise, but it makes unit testing impossible. But getting negative ages or ages over 200 just means this is broken. With realistic privacy budgets and multiple queries, the noise often overwhelms the signal. 
+
+P3: Also, let me look at the length of this output list. Wait, there are only 12 rows. But there are 16 unique education levels... Looking at the documentation... I see something about Stable Keys. I guess it drops small groups entirely to protect privacy? Important behaviors, parameters, or concepts are undocumented in an obvious way here. 
+
+P3: Trying to remember the privacy budget, data types, bounds, and the specific syntax for each operation all at once is overwhelming. Let me try one of the other libraries to see if they handle this better. 
+
+P3: arghhh. OpenDP isn't working for me. Too complex. Alright, let's switch to PyDP. Wait, I haven't tried OpenDP yet, let me actually look at OpenDP's documentation first before I give up. 
+
+P3: Okay, looking at OpenDP. The OpenDP documentation leads with the core API... A practitioner might give up before finding the Polars integration. Let me read the core API docs. 
+
+P3: The API uses the term 'space_of', which means nothing to me as a standard Python developer. And the chaining syntax (>>) is unusual for Python. 
+
+P3: Let me try to build a basic mean query with this. It took me a while to realize that the Laplace mechanism is buried three modules deep under opendp.measurements.laplace. 
+
+P3: Let me try to pass my Pandas dataframe into this OpenDP pipeline. *Runs code*. 
+
+P3: And I got a massive error. Error: type mismatch: expected i32, found String... The error message is even more cryptic because it's talking about Rust types. OpenDP's type system is very strict... This caught several bugs but also slowed me down significantly. I had to convert integers to floats explicitly, and the space_of declarations need to match exactly. 
+
+P3: I ended up searching Stack Overflow and asking ChatGPT to show me how others handle this OpenDP GroupBy query. But ChatGPT gave me a generated response suggesting `opendp.t.make_groupby(keys='education').agg(opendp.m.make_laplace_mean(epsilon=1.0))`. When I checked the actual OpenDP package in Python, `make_groupby` doesn't exist at all! ChatGPT completely hallucinated a pandas-like API that sounds super convincing, but is totally non-existent.
+
+P3: I just spent an hour trying to figure out why my Differential Privacy mean was returning NaN instead of throwing an error, and the AI assistant only made it worse by hallucinating fake methods. Some functions fail silently or with unclear errors. I am going to abandon OpenDP, it's just too low-level. 
+
+P3: Let's try PyDP for this groupby task instead. Let me pip install it. Okay, that worked. Let's look at the docs. 
+
+P3: Okay, I want to calculate a bounded mean. Let me initialize `pydp.algorithms.laplacian.BoundedMean`. 
+
+P3: But wait, I see an error for a count operation, why do I need bounds? Oh wait, I'm looking at the wrong tab, let me go to the mean example. 
+
+P3: The example code here is super basic. I have to manually loop over the education levels again because PyDP doesn't seem to have a native groupby either. So I'm back to the budget splitting problem. 
+
+P3: Triple epsilon splitting: groups -> sum/count -> very small eps. I'm going to get the exact same garbage results because the epsilon per group will be 0.0625. 
+
+P3: I'll just write it out to see if the syntax is better. I have to pass the bounds into the constructor. `BoundedMean(epsilon=0.0625, lower_bound=0, upper_bound=100)`. Then I add entries one by one? Or can I pass a list? 
+
+P3: I'll pass the list of ages for one group. *Runs code*. Okay, it returned something, but the function returned a mechanism object instead of the actual noisy number, which confused me. I have to call `.result()` on it. 
+
+P3: Let's print the result. Yeah, it's 185.2 for a high school graduate. The results differ between libraries even with the same epsilon and bounds! This is concerning. I'm getting results, but I'm not 100% confident they're correct. 
+
+P3: I think I'm stuck here. MAJOR FRUSTRATION: I'm running into several issues here.... There are so many different ways to construct a Differential Privacy mean that I don't know which one to pick anymore. 
+
+Ravi Mahankali: That is perfectly fine. We can wrap up the coding portion here. Before we finish, I'd like to ask a few brief questions. Which library did you find easiest to use, and why?
+
+P3: IBM DiffPrivLib was the easiest to get started with because it looks the most like standard Pandas and Numpy. But missing the groupby function is a huge pain. OpenDP doesn't have a simple 'bounded mean' function like the other libraries. It forces you to build everything from scratch. 
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P3: The lack of guidance on parameters. None of the libraries provide good guidance on choosing epsilon or managing the privacy budget across multiple queries. And the bounds thing. If I set the income upper bound to 100k, I lose the high earners, but if I set it to 1 million, the noise destroys the mean. 
+
+Ravi Mahankali: Did you feel confident that your implementations were correct and privacy-preserving?
+
+P3: Not at all. If I get these wrong, the privacy guarantees could be compromised. The library doesn't provide any way to verify the privacy guarantees are being met. 
+
+Ravi Mahankali: Is there anything you would have done differently if this were a real project?
+
+P3: I'd probably have to build my own wrapper functions around the raw mechanisms. And I'd need way better documentation. I found a helpful tutorial on Medium that explained it better than the official docs. 
+
+Ravi Mahankali: Thank you so much for your time and your honest feedback. Your participation helps us understand how to improve these tools. 
+
+P3: No problem, happy to help.

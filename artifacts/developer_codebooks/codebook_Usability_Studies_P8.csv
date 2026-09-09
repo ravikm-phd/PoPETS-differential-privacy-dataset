@@ -1,0 +1,71 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+ExperienceLevel,I've been working with Python for about 12 years now,Session Introduction,Experienced developer new to DP
+BackgroundMismatch,I've never worked with differential privacy before. I understand the basic concept - adding noise to protect individual privacy - but I haven't implemented it,Session Introduction,Strong Python skills but no DP experience
+PackageNaming,The package names are different from what I might expect... the naming isn't entirely intuitive,Installation,Package discovery challenges
+PackageNaming,If I were searching for 'differential privacy python' I'm not sure these would be the first results,Installation,Discoverability issue
+DocumentationComparison,OpenDP seems to have invested more in documentation infrastructure,Initial impressions,Noting documentation differences
+MentalModel,I expect there to be some mechanism to add calibrated noise to query results,Pre-coding,Developer's expectation of API
+MentalModel,I imagine there would be functions like private_count() or private_mean(),Pre-coding,Expected intuitive function names
+MentalModel,I'm hoping the API is similar to pandas or numpy,Pre-coding,Hoping for familiar patterns
+DocumentationStructure,The documentation structure is a bit fragmented,IBM DiffPrivLib,Documentation organization issues
+DocumentationStructure,"I see examples for machine learning models, which is great, but for basic statistics like counting, I'm having to dig deeper",IBM DiffPrivLib,Missing basic operation examples
+APIDiscoverability,"I see there's mean, std, var, sum, count_nonzero, histogram, percentile, and quantile",IBM DiffPrivLib,Exploring available functions
+WorkaroundRequired,"I could create a binary column where 1 means '>50K' and 0 means '<=50K', then sum that column",IBM DiffPrivLib,Devising workaround for count
+APIMisuse,TypeError: sum() got an unexpected keyword argument 'epsilon',IBM DiffPrivLib,Incorrect API usage
+ErrorMessagesUnhelpful,"The error message also wasn't very helpful - it just said unexpected keyword argument, not 'you need to specify bounds first'",IBM DiffPrivLib,Error doesn't guide solution
+BoundsConfiguration,"The bounds for a binary column are (0, 1)",IBM DiffPrivLib,Understanding bounds for binary data
+ImplementationSuccess,It worked! I got a result,IBM DiffPrivLib,Successful task completion
+BoundsImpact,The result is much noisier now because the sensitivity is calculated based on the bounds,IBM DiffPrivLib,Testing incorrect bounds effect
+SilentFailure,This is a potential pitfall for users who don't understand the relationship between bounds and noise. The library doesn't warn you,IBM DiffPrivLib,Missing warning for suboptimal config
+GroupByMissing,"In regular pandas, I would do df.groupby('education')['age'].mean(). But with differential privacy...",IBM DiffPrivLib,Expecting familiar patterns
+GroupByMissing,Nothing with 'group' in the name. So I'll need to manually iterate,IBM DiffPrivLib,No built-in groupby support
+BudgetManagement,I manually split the epsilon budget across all education levels. Is this the right approach?,IBM DiffPrivLib,Uncertainty about budget splitting
+BudgetManagement,The library didn't help me with privacy budget management,IBM DiffPrivLib,Manual budget allocation required
+CompositionAwareness,"If you run multiple queries, you need to account for the cumulative privacy loss",IBM DiffPrivLib,Understanding composition
+BudgetAccountant,I notice diffprivlib has an accountant module - maybe I should be using that?,IBM DiffPrivLib,Discovering budget tracking feature
+BudgetEnforcement,BudgetError: Privacy budget exceeded. This is actually good - the library is protecting me,IBM DiffPrivLib,Positive error for budget protection
+PrivacyParameterGuidance,What's a reasonable epsilon value? The library doesn't provide guidance on this,IBM DiffPrivLib,Missing epsilon guidance
+PrivacyParameterGuidance,"I've read that epsilon values between 0.1 and 10 are common, but the choice depends on the use case",IBM DiffPrivLib,External knowledge required
+PositiveFeedback,The API is relatively intuitive once you understand it,IBM DiffPrivLib Summary,Positive assessment after learning
+PositiveFeedback,"The function names match numpy/pandas conventions (sum, mean, etc.)",IBM DiffPrivLib Summary,Familiar naming praised
+PositiveFeedback,The BudgetAccountant is a nice feature for tracking privacy spending,IBM DiffPrivLib Summary,Budget tracking appreciated
+MissingDocumentation,Documentation could be clearer about required parameters like bounds,IBM DiffPrivLib Summary,Documentation gaps
+GroupByMissing,No built-in support for groupby operations,IBM DiffPrivLib Summary,Missing common feature
+PrivacyParameterGuidance,No guidance on choosing epsilon values,IBM DiffPrivLib Summary,Missing parameter guidance
+APIStructure,They use class-based algorithms rather than functions,PyDP,Different API paradigm
+APIStructure,"This is more explicit about the underlying mechanism, which I appreciate from an educational standpoint",PyDP,Explicit mechanism naming
+APIMisuse,TypeError: quick_result(): incompatible function arguments,PyDP,API usage error
+ErrorMessagesUnhelpful,The error message isn't very helpful,PyDP,Poor error message
+MissingDocumentation,The documentation is really unclear about the correct usage pattern,PyDP,Documentation lacks clarity
+FrustrationExpressed,Fairly high. I've spent about 10 minutes just trying to figure out the basic API,PyDP,Significant time wasted
+TimeWasted,I've spent about 10 minutes just trying to figure out the basic API,PyDP,Learning curve cost
+WorkaroundRequired,I had to use BoundedSum instead of Count because I couldn't figure out how to use Count correctly,PyDP,Workaround for unexpected API
+APIUnexpected,The Count class didn't work as expected,PyDP,API behavior mismatch
+UsabilityProblem,A developer shouldn't have to guess or use workarounds for basic operations,PyDP,Fundamental usability issue
+TypeConversion,"Requires converting numpy arrays to lists, which is inconvenient",PyDP Summary,Data type incompatibility
+BudgetManagement,No built-in privacy budget tracking (unlike diffprivlib's accountant),PyDP Summary,Missing budget tracking
+PositiveFeedback,Explicit about the underlying mechanism (Laplacian vs Gaussian),PyDP Summary,Educational naming
+PositiveFeedback,quick_result() method is convenient for one-shot queries,PyDP Summary,Convenient API pattern
+DocumentationQuality,The OpenDP website looks more polished than the others,OpenDP,Better documentation presentation
+DocumentationStructure,"They have a 'Getting Started' guide, API reference, and even a user guide",OpenDP,Well-organized documentation
+AbstractConcepts,They talk about 'measurements' and 'transformations' as the core building blocks. This is a different paradigm,OpenDP,New conceptual model
+AbstractConcepts,This is more abstract than I expected,OpenDP,High abstraction level
+FeatureEnabling,dp.enable_features('contrib'),OpenDP,Feature flags required
+ConceptualModel,"A transformation modifies data without adding noise, and a measurement adds noise to provide privacy",OpenDP,Learning transformation-measurement paradigm
+ErrorMessagesImproved,"The error is more informative than PyDP's, but I still don't fully understand what's wrong",OpenDP,Partial improvement in errors
+DomainSpecification,I need to properly define the input domain and metric,OpenDP,Complex setup requirements
+LearningCurveTooSteep,OpenDP has the steepest learning curve of the three libraries,OpenDP,Steep learning curve noted
+AbstractConcepts,"The concepts of domains, metrics, transformations, and measurements are powerful but abstract",OpenDP,Powerful but complex
+AbstractConcepts,"For someone without a formal DP background, this is challenging",OpenDP,Requires DP knowledge
+TrustVerification,I appreciate that the library is trying to be more rigorous about privacy guarantees,OpenDP,Rigor appreciated
+ManualImplementation,I'm essentially implementing DP manually rather than using the library's abstractions,OpenDP,Falling back to manual approach
+ChainingOperator,The chaining syntax with >> and properly defining the input domain and metric,OpenDP,Learning chaining pattern
+ImplementationSuccess,It works! Finally!,OpenDP,Success after struggle
+SensitivityCalculation,The sensitivity for mean is more complex than for count,OpenDP,Complex sensitivity for mean
+PrivacyVerification,The map() function shows the actual privacy guarantee,OpenDP Summary,Verification capability
+OverallAssessment,diffprivlib was easiest to get started with,Final Comparison,Library ranking
+OverallAssessment,PyDP had the most frustrating documentation,Final Comparison,Documentation criticism
+OverallAssessment,OpenDP is most rigorous but has highest learning curve,Final Comparison,Rigor vs accessibility tradeoff
+IdealFeatures,Native support for DataFrames,Wishlist,Pandas integration desired
+IdealFeatures,Automatic bounds inference - Or at least warnings when bounds seem wrong,Wishlist,Reducing user burden
+IdealFeatures,Privacy budget visualization - Show how budget is being spent across queries,Wishlist,Visual feedback desired

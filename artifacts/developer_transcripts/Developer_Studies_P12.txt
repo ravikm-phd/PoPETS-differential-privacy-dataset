@@ -1,0 +1,91 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P12 (Senior Developer, India, 7 Py. Yrs, 5 DS Yrs, Intermediate, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P12: No, all good. I am ready to start.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P12: I'm a Senior Developer at a software product company in India. I have about 7 years of Python experience, mostly working on backend infrastructure and data services. For data science specifically — things like feature pipelines, pandas data processing, and statistical analytics —, I'd say about 5 years.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with OpenDP, PyDP, or IBM DiffPrivLib specifically?
+
+P12: I have intermediate conceptual knowledge of Differential Privacy. I know about sensitivity, Laplace mechanisms, and how privacy budgets work mathematically. But I haven't integrated any production DP libraries into our pipelines yet, so today is my first hands-on test with OpenDP, PyDP, and DiffPrivLib.
+
+Ravi Mahankali: Perfect. What does your typical development environment look like?
+
+P12: VS Code on macOS, standard virtual environments, and Jupyter notebooks for rapid testing. I rely primarily on official library documentation when learning a new tool.
+
+Ravi Mahankali: Excellent. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with total budget epsilon equal to 1.0. You are expected to complete this task using all three libraries in the designated order: OpenDP first, then PyDP, then IBM DiffPrivLib. The dataset is already loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P12: Okay, let me start by reading the dataset in pandas to verify the columns.
+
+P12: The dataset is loaded. The `income` column has strings `<=50K` and `>50K`. The exact count of individuals with `income > 50K` in pandas is 7841. Now I'll implement the differentially private count, starting with OpenDP.
+
+P12: Let me open the OpenDP documentation.
+
+P12: OpenDP uses pipeline transformations and measurements. I need to declare the domain and metric types explicitly before creating a measurement.
+
+P12: Looking at these OpenDP type declarations... It's strictly typed, which is annoying for Python. I'm used to duck typing where you just pass objects and let Python handle dynamic types. Here you have to specify `atom_domain(T=str)` and `VectorDomain` upfront.
+
+P12: Now I'll create the count transformation. I thought count would behave like pandas count—but it's just 'length'. In pandas, `count()` filters non-nulls or counts matching criteria, but in OpenDP `make_count` simply computes the total number of elements in the input vector. It doesn't take a boolean condition or filter expression.
+
+P12: I asked ChatGPT: "How to pass a pandas Series into OpenDP make_count?"
+
+P12: ChatGPT suggested passing `df['income']` directly into `meas(df['income'])`. But when I run that, OpenDP raises a TypeError: `expected list, got Series`. ChatGPT completely missed that OpenDP requires explicit list conversion! The AI model assumes OpenDP accepts pandas Series like scikit-learn does. I had to manually convert it with `.tolist()`.
+
+P12: So I need to pre-filter the data in pandas first to extract only the `>50K` entries, convert that to a list of strings, and then pass it to the OpenDP pipeline.
+
+P12: That ran and returned 7844. Once the domain types and pre-filtering were sorted out, the measurement pipeline produced a plausible result.
+
+Ravi Mahankali: Please move to PyDP for Task 1.
+
+P12: Now switching to PyDP to compare. Let me check the PyDP documentation.
+
+P12: PyDP has a `Count` class in `pydp.algorithms.laplacian`. Let's test it.
+
+P12: PyDP returned 7838. I notice when looking at PyDP's algorithms like `BoundedMean` or `BoundedSum`, the bound parameters are named explicitly instead of a tuple. That's clearer than passing an unlabelled tuple like `(17, 90)` — having explicit `lower_bound=17` and `upper_bound=90` keyword arguments makes the code much more self-documenting.
+
+Ravi Mahankali: Now please try IBM DiffPrivLib for Task 1.
+
+P12: Let's test DiffPrivLib. I'll search `diffprivlib.tools` for `count_nonzero`.
+
+P12: TypeError: `count_nonzero() got an unexpected keyword argument 'epsilon'`. The function signature in this version doesn't take epsilon directly. I'll fall back to the Laplace mechanism directly.
+
+P12: DiffPrivLib returned 7836. That wraps up Task A for all three tools.
+
+Ravi Mahankali: Great progress. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work.
+
+P12: Task B is a grouped aggregation across 16 unique education categories. Grouping is fundamental to real-world data pipelines.
+
+P12: Let's check native GroupBy support across the libraries. None of the three provide a native DataFrame GroupBy helper out of the box, so I must write a manual loop in Python over unique education levels.
+
+P12: For budget composition: under sequential composition, splitting epsilon 1.0 across 16 queries gives `1.0 / 16 = 0.0625` per group. Let's test this in PyDP.
+
+P12: Small groups like 'Preschool' or 'Doctorate' produce wild numbers because 0.0625 per query adds huge noise. If parallel composition applies because education categories are disjoint, using `epsilon=1.0` per group gives accurate averages ('Bachelors' 38.2, 'Masters' 40.7, 'Doctorate' 44.1). But PyDP does not track parallel composition or verify that partitions are disjoint.
+
+P12: In DiffPrivLib, calling `diffprivlib.tools.mean` without bounds triggers a `PrivacyLeakWarning: Bounds have not been specified and will be inferred from the data.` Supplying explicit bounds `(17, 90)` resolves the warning. In OpenDP, building a measured mean pipeline for floats requires explicit domain clamping and metric type matching inside the loop.
+
+Ravi Mahankali: Thank you — that completes the tasks. A few closing debrief questions. Which library did you find easiest to use, and why?
+
+P12: PyDP was the most straightforward for individual tasks. Having explicit parameter names like `lower_bound` and `upper_bound` made the API readable. DiffPrivLib was familiar because of its NumPy-like design, and its `PrivacyLeakWarning` is great. OpenDP was the hardest because of strict static typing friction.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P12: The strict type system in OpenDP, the initial confusion where I thought `make_count` would behave like pandas count when it's really just length, and the lack of native DataFrame GroupBy support with automatic parallel composition tracking.
+
+Ravi Mahankali: Did you feel confident in your implementations?
+
+P12: For single count queries, yes. For grouped aggregations, less so — because managing composition split versus parallel composition manually in a loop leaves too much room for accounting errors.
+
+Ravi Mahankali: What would you recommend to maintainers of DP libraries?
+
+P12: Build native DataFrame GroupBy support, provide explicit parameter names across function signatures, and offer clear documentation and warnings when utility is destroyed by small budget splits.
+
+Ravi Mahankali: Thank you very much for your time and feedback.
+
+P12: Thank you! This was a very valuable study.

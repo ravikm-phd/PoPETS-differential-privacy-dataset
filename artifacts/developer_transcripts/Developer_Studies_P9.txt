@@ -1,0 +1,71 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P9 (PhD Student, UK, 6 Py. Yrs, 4 DS Yrs, Novice, Academia)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P9: No, that all makes sense. I'm ready to get started.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P9: I've been programming in Python for about 6 years and working in data science for about 4 years, mainly focused on statistical analysis and machine learning in my PhD work.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with PyDP, OpenDP, or IBM DiffPrivLib specifically?
+
+P9: I know the theory conceptually from papers and a graduate course, but I've never implemented anything using these libraries before. Today is my first time writing code with them.
+
+Ravi Mahankali: And what does your typical development environment look like?
+
+P9: Mostly Jupyter notebooks and VS Code, using standard libraries like pandas, NumPy, and scikit-learn. I prefer reading official documentation directly when learning new tools.
+
+Ravi Mahankali: Perfect. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with total budget epsilon equal to 1.0. You are expected to complete this task using all three libraries in the designated order: PyDP first, then OpenDP, then IBM DiffPrivLib. The dataset is already loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P9: Okay, I'll start with PyDP. Let me load the data in pandas first.
+
+P9: The dataset has an `income` column with string values `<=50K` and `>50K`. Now I'll check the PyDP documentation for a count query.
+
+P9: Now the privacy budget. So I mean, am I allowed to put any value for that? Is there a valid range, or does the library enforce constraints?
+
+P9: Let me quickly ask ChatGPT: "What is a good value for epsilon in PyDP?"
+
+P9: ChatGPT replied with a rule of thumb: "Use 0.1 for strict privacy, 1.0 for standard privacy, and 5.0 for low privacy." That gives me a general idea, but ChatGPT didn't explain what the real-world trade-off is for my dataset size. I'll stick with epsilon=1.0 as requested in the prompt, but it's clear the LLM just parrot general textbook rules without helping me evaluate actual privacy risks.
+
+P9: PyDP returned 7832 (true count is 7841). That executed cleanly.
+
+P9: Now moving to OpenDP for Task A. OpenDP uses pipeline constructors.
+
+P9: OpenDP returned 7844. Setting up explicit domain and metric types took a few iterations to resolve type errors, but the pipeline ran correctly.
+
+P9: Next, IBM DiffPrivLib for Task A. I'll search `diffprivlib.tools` for `count_nonzero`.
+
+P9: TypeError: `count_nonzero()` got an unexpected keyword argument 'epsilon'. The high-level tool signature doesn't accept epsilon, so I'll use the Laplace mechanism directly.
+
+P9: Got 7836. That completes Task A across all three tools.
+
+Ravi Mahankali: Great progress. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please narrate your process.
+
+P9: Task B requires grouped aggregation across 16 unique education levels in `adult.csv`. None of the three libraries provide native DataFrame GroupBy integration, so I must write a manual loop over education categories.
+
+P9: Regarding budget composition: under sequential composition, allocating budget across 16 groups means splitting `epsilon = 1.0 / 16 = 0.0625` per group.
+
+P9: Small groups produce very noisy numbers when splitting budget down to 0.0625. If parallel composition applies across disjoint education groups, passing `epsilon=1.0` per group yields plausible averages (Bachelors ~38.2, Masters ~40.7, Doctorate ~44.1). However, the libraries do not automatically verify or enforce parallel composition.
+
+P9: In DiffPrivLib, calling `diffprivlib.tools.mean` without explicit bounds produces a `PrivacyLeakWarning: Bounds have not been specified and will be inferred from the data.` Setting explicit bounds `(17, 90)` eliminates the warning. In OpenDP, building a measured mean pipeline requires explicit domain clamping and metric type alignment inside the loop.
+
+Ravi Mahankali: Thank you — that completes the tasks. A few closing questions. Which library did you find easiest to use, and why?
+
+P9: PyDP was the most accessible for simple queries because of its clean `Count` class. DiffPrivLib felt familiar due to its NumPy-like syntax and helpful runtime warnings. OpenDP has a steep learning curve due to its typed pipeline requirement.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P9: Understanding privacy budget allocation, bounds selection, and the lack of native DataFrame GroupBy support. Having to manually manage loops and composition creates confusion around budget splitting versus parallel composition.
+
+Ravi Mahankali: Did you feel confident in your implementations?
+
+P9: For simple counts, yes. For grouped means, less confident because proving parallel composition and choosing optimal bounds without looking at raw data requires theoretical reasoning that the tools don't guide you through.
+
+Ravi Mahankali: Thank you for your participation and feedback.
+
+P9: Thank you! This was very educational.

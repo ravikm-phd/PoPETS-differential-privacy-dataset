@@ -1,0 +1,33 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+LackOfCommunitySupport,I'm not finding much. No Stack Overflow tag with significant activity no dedicated Discord server no official forum,GitHub Investigation - 00:15,Searching for community support channels
+LackOfCommunitySupport,When I work with libraries like React FastAPI or even niche tools like Celery there are vibrant communities. I don't see that here,Initial Research - 00:05,Comparing DP libraries to mainstream tools
+LackOfCommunitySupport,There's basically nothing. I'm just seeing GitHub repositories and some academic papers,Initial Research - 00:05,Lack of practitioner community infrastructure
+LackOfCommunitySupport,I don't see active forums Discord servers or community spaces for any of these libraries,Task 1 - OpenDP - 01:00,Missing informal communication channels
+MissingDocumentation,But this workaround is buried in a GitHub issue comment. How is anyone supposed to find this?,GitHub Investigation - 00:15,Knowledge hidden in issue threads
+CommunityKnowledgeGap,Knowledge is fragmented and hidden in issue comments. In a healthy open source community someone would have submitted a PR to update the documentation,GitHub Investigation - 00:15,Lack of knowledge sharing culture
+CommunityKnowledgeGap,"In a vibrant community I'd just post a quick answer on Stack Overflow or share a code snippet on Discord and it would help people immediately. But those channels don't exist here",Task 1 - IBM DiffPrivLib - 00:30,No quick knowledge sharing mechanisms
+CommunityKnowledgeGap,"And now that I've figured this out where do I share it? There's no active forum to post to Stack Overflow has no traction for this library",Task 1 - IBM DiffPrivLib - 00:30,No venue for sharing solutions
+CommunityKnowledgeGap,This is how knowledge gets lost. I figured it out but the next person will struggle with the same problem because there's no good place to share solutions,Task 1 - IBM DiffPrivLib - 00:30,Knowledge doesn't propagate
+CommunityContribution,Would you consider contributing to the documentation? Honestly? Probably not. Contributing to open source docs is time-consuming,Task 1 - IBM DiffPrivLib - 00:30,High friction for documentation contributions
+CommunityContribution,"Fork the repo Learn the docs build system Write the documentation Submit a PR Go through review cycles Wait weeks or months for it to be merged",Task 1 - IBM DiffPrivLib - 00:30,Complex contribution process
+CommunityIncentives,In other communities there's social pressure to share back. On Stack Overflow you get reputation points. On Discord you build credibility. Here? Nothing,Task 1 - OpenDP - 01:00,Lack of incentives for knowledge sharing
+CommunityIncentives,This is the tragedy of the commons in open source. People take knowledge but don't give back,Task 1 - OpenDP - 01:00,No reciprocity in community
+GitHubIssueSearch,"Here's someone asking the exact question I had about counting filtered rows. Posted 8 months ago no response from maintainers",GitHub Investigation - 00:15,Unanswered questions in issues
+GitHubIssueSearch,The maintainer's response is basically you need to understand how make_count works. No code example just a conceptual explanation,Task 1 - OpenDP - 01:00,Insufficient examples in issue responses
+GitHubIssueSearch,And then the issue is closed with no working code example! The person who asked probably figured it out eventually but they didn't share their solution back,Task 1 - OpenDP - 01:00,Knowledge not captured in issues
+GitHubIssueSearch,"Here's an issue from someone asking about group-by operations. Posted 1 year ago. The maintainer's response doesn't have built-in group-by support. And then nothing",Task 2 - IBM DiffPrivLib - 01:25,Common problems not addressed
+MaintainerResponseTime,Some issues from 6 months ago have no response from maintainers,GitHub Investigation - 00:15,Slow maintainer response
+MaintainerResponseTime,The response time seems slow. Posted 8 months ago no response from maintainers,GitHub Investigation - 00:15,Long wait for answers
+AcademicCulture,The differential privacy space is dominated by academics and researchers. They publish papers they don't engage with developer communities,GitHub Investigation - 00:15,Academic vs practitioner divide
+AcademicCulture,They don't think about the practitioner experience. They publish papers they present at conferences they cite each other's work. But they're not embedded in the practitioner community,Final Reflection - 01:50,Research-focused not practitioner-focused
+AcademicCulture,These libraries are built by researchers for researchers. They're not embedded in the practitioner community,Initial Research - 00:05,Design for academic audience
+PractitionerNeeds,If this were a popular library like pandas or scikit-learn there would be hundreds of Stack Overflow questions with answers for common use cases,Task 1 - IBM DiffPrivLib - 00:30,Comparison to mature ecosystems
+PractitionerNeeds,More concrete examples! Show me: Here's how you count rows that match a condition with the actual code not abstract concepts,Task 1 - OpenDP - 01:00,Need for practical examples
+WorkaroundRequired,Let me use the workaround from the comment,Task 1 - IBM DiffPrivLib - 00:30,Using community-found solutions
+WorkaroundRequired,I had to dig through GitHub issue comments to find this solution. This should be in the official documentation,Task 1 - IBM DiffPrivLib - 00:30,Solutions not officially documented
+DocumentationStructure,There are no examples showing how to integrate DP into web frameworks. I'll have to figure it out myself,Task 1 - Integration Attempt - 00:20,Missing integration examples
+CommunityInfrastructure,"Until differential privacy libraries have that kind of community they'll remain academic tools that practitioners struggle to adopt",Final Reflection - 01:50,Ecosystem immaturity
+CommunityInfrastructure,"The maintainers need to create and actively participate in Discord/Slack/forums. Not just GitHub issues",Final Reflection - 01:50,Need for official community channels
+CommunityInfrastructure,Community managers. Someone whose job is to nurture the community answer questions and encourage knowledge sharing,Final Reflection - 01:50,Need for community management
+CommunityInfrastructure,Make it easy to contribute to docs. Lower the barrier for community contributions,Final Reflection - 01:50,Reduce contribution friction
+CommunityInfrastructure,The maintainers should actively answer Stack Overflow questions and encourage a critical mass of Q&A there,Final Reflection - 01:50,Need Stack Overflow presence

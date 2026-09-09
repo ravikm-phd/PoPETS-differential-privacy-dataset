@@ -1,0 +1,62 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+DocumentationApproach,"My first thought is to just see what these libraries actually do, so I'll just open all of them",Library Exploration,Understanding libraries first
+DocumentationApproach,I feel like examples kept the clearest review,Library Exploration,Examples as learning approach
+LanguageBinding,One thing I notice is open DP is originally written in some other language and it has a binding in Python,Library Exploration - OpenDP,Language binding observation
+LanguageBinding,I guess it must be written and Rust,Library Exploration - OpenDP,Identifying Rust origin
+LibraryPurpose,"When I think of differential privacy libraries, I think it means that the calculation will be slower and harder",Task Understanding,Preconception about DP libraries
+ExampleCode,I can directly use the example,IBM DiffPrivLib,Finding usable example
+APIDiscoverability,I'm guessing it must also have the count. Probably. Let me just see,IBM DiffPrivLib,Expecting count function
+ConfusionExpressed,"Wait, that's weird. I don't see it being used",PyDP Example,Confused by example
+PackageNaming,IBM DiffPrivLib and open DP port are imported as DP. That's weird to me,Library Comparison,Naming confusion
+PackageNaming,Probably they are not meant to be used together and meant to be used as a replacement,Library Comparison,Understanding exclusivity
+DocumentationStructure,"OK, this documentation is kind of weird. Where are the? Where is the code?",OpenDP Documentation,Navigation difficulty
+APIComparison,I'm just trying to understand right now what each of the library does,Library Comparison,Comparative exploration
+LearningCurveTooSteep,This looks harder to use as compared to PyDP,OpenDP vs PyDP,OpenDP complexity noted
+AbstractConcepts,So is making something called a compositor. I'm not sure what this is,OpenDP Context,Unfamiliar terminology
+AbstractConcepts,"I'm not sure what this is, but let me just ignore that and continue",OpenDP Context,Skipping unfamiliar concepts
+DocumentationStructure,Accountant and tools seems the most promising to me right now,IBM DiffPrivLib,Finding useful modules
+LibraryChoice,"For now, IBM DiffPrivLib seems to be the easiest to me",Library Selection,Choosing easiest library
+ExampleCode,Because I can directly use the example,IBM DiffPrivLib,Example-driven choice
+HowShouldIUseThis,"I'm still not fully sure what this test. Wait, what exactly are differential privacy libraries?",Understanding DP,Conceptual uncertainty
+HowShouldIUseThis,I'm not fully sure whether this accountant thing has to be used,IBM DiffPrivLib,API uncertainty
+MissingDocumentation,This looks like something that could be all that examples here. No examples interesting,IBM DiffPrivLib tools,Missing examples
+VMLagIssue,"No. Yeah, the VM is very laggy. I have pressed the button like",Technical Issues,VM performance problems
+VMLagIssue,It is very hard to scroll over here,Technical Issues,VM usability problems
+DataExploration,So I just need to calculate the number greater than 50K,Task 1,Understanding requirements
+DataExploration,I am guessing this number must be the yearly income,Task 1,Interpreting data
+DataFormat,One thing which is really nice for me is that this is in a very clean way,Data Understanding,Appreciating data format
+DataFormat,"This is less than 50K date. This means less than 50K, greater than 50K",Data Understanding,Understanding column values
+CopyPasteIssue,If this will copy inside the VMS will how do I type everything by hand?,Technical Issues,Copy-paste concerns
+CopyPasteIssue,I'll probably just copy the 1st 5 rows somewhere in my Google Chrome because this is very easy to not see,Technical Issues,Working around VM issues
+AutoSaveIssue,"Auto save is not yet on yet just realised. In this VS code, that must be the issue",Technical Issues,IDE configuration
+ImplementationSuccess,Data frame is working. I guess this is pretty correct,Task Progress,Successfully loading data
+DataFormatIssue,So I think I'm writing the limit wrong. Let me just see how it is written in the data set,Task 1 - Filtering,Data format mismatch
+DataFormatIssue,"Is there a space between 50 and K? No, that is not",Task 1 - Filtering,Checking whitespace
+HowShouldIUseThis,"Wait, how do I use this? The documentation says count(array, epsilon=...) but I need to count rows that match a condition",IBM DiffPrivLib Task 1,Function usage unclear
+HowShouldIUseThis,"I think I need to filter the data first, then count the length, and apply DP to that count? Or can I pass a boolean array?",IBM DiffPrivLib Task 1,Multiple possible approaches
+MissingDocumentation,The documentation isn't super clear. It says 'count' but doesn't show a clear example of counting filtered rows,IBM DiffPrivLib Task 1,Missing use case example
+WorkaroundRequired,Maybe I should use mechanisms directly?,IBM DiffPrivLib Task 1,Considering lower-level API
+SensitivityKnowledge,"For counting, if I add or remove one row, the count changes by at most 1, so sensitivity should be 1",IBM DiffPrivLib Task 1,Applying DP theory
+WorkaroundRequired,I feel like I'm working around the library rather than using it as intended,IBM DiffPrivLib Task 1,Workaround feels wrong
+MissingDocumentation,The documentation should make this clearer - when to use tools vs mechanisms directly,IBM DiffPrivLib Task 1,API guidance missing
+BoundsConfiguration,The bounds are important - I need to specify the min and max possible values for age,IBM DiffPrivLib Task 2,Understanding bounds
+BoundsConfiguration,"It shows 17 and 90. So I could use (17, 90) or be more conservative with (0, 100)",IBM DiffPrivLib Task 2,Bounds tradeoff decision
+BoundsImpact,"I'll use (0, 100) to be safe, though it might add more noise than necessary",IBM DiffPrivLib Task 2,Understanding bounds-noise relationship
+ImplementationSuccess,This task was much easier with IBM DiffPrivLib than Task 1,IBM DiffPrivLib Task 2,Easier experience with mean
+PositiveFeedback,"The mean() function is straightforward and well-documented. The API is consistent - I pass data, epsilon, and bounds. It's intuitive",IBM DiffPrivLib Task 2,Positive feedback on mean
+PositiveFeedback,Simple API for common operations like mean. The mean() function is intuitive and well-documented. I could directly use the examples,Final Reflection - IBM,Positive assessment
+APIInconsistency,"The count() function was confusing for filtered data. I had to use mechanisms directly, which felt like a workaround",Final Reflection - IBM,Count function issues
+APIInconsistency,"The API is inconsistent - mean() works great, but count() requires a different approach",Final Reflection - IBM,Inconsistency noted
+DocumentationStructure,The documentation structure is confusing. It's not clear where to find the code examples,Final Reflection - PyDP,Documentation navigation
+LearningCurveTooSteep,Very steep learning curve. This looks harder to use as compared to PyDP,Final Reflection - OpenDP,OpenDP complexity
+AbstractConcepts,"It requires understanding of compositors, transformations, and measurements",Final Reflection - OpenDP,Complex concepts required
+LanguageBinding,"I noticed it's originally written in Rust and has a Python binding, which might explain some of the complexity",Final Reflection - OpenDP,Rust binding observation
+ExampleCode,"Show real-world scenarios like 'count rows matching condition' or 'compute mean by group' with complete, working code",Final Recommendations,Better examples needed
+ClarityOfDocumentation,"Explain not just what functions do, but when to use them, common patterns, and the mental model behind the API design",Final Recommendations,Documentation improvements
+ErrorMessagesUnhelpful,"Tell me what type is expected, show an example of correct usage, not just that there's a mismatch",Final Recommendations,Better error messages
+APIConsistency,"Within a library, similar operations should work similarly",Final Recommendations,Consistency needed
+DocumentationStructure,Organize documentation better. Don't just send people to example codes - provide clear explanations,Final Recommendations,Structure improvement
+GettingStartedGuide,"Step-by-step tutorials that build from simple to complex, not just API reference",Final Recommendations,Progressive tutorials needed
+OverallAssessment,IBM DiffPrivLib was the most approachable for someone new to DP,Final Summary,Best for beginners
+LearningCurveTooSteep,All three libraries assume you already understand differential privacy well,Final Summary,Expert-oriented design
+LearningCurveTooSteep,"As a Python developer who's new to DP, I needed more hand-holding",Final Summary,More guidance needed

@@ -1,0 +1,157 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P14 (Data Analyst, US, 5 Py. Yrs, 3 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thanks for joining us today. We are studying how P14s work with Differential Privacy libraries in practice. You will work on two data analysis tasks using three DP libraries. Please think aloud as you go — narrate what you are doing and why, as you would explain your process to a colleague. There are no right or wrong answers. You may use documentation, online search, or any resources you would normally rely on. I will not guide your implementation decisions. The session will be recorded and all data will be anonymised. Any questions before we begin?
+
+P14: Nope, I'm good to go.
+
+Ravi Mahankali: Great. A few background questions first. How many years of Python experience do you have, and how many years of data science or analytics specifically?
+
+P14: Python — about five years. I started using it at my first job doing some light scripting work, and then moved into more data-heavy stuff. Data science or analytics proper, I'd say three years. Day-to-day it's pandas and SQL. I do reporting, dashboards, the occasional deeper analysis when there's a real business question. It's not machine learning — I'm more on the analytics and data engineering side.
+
+Ravi Mahankali: And your prior experience with Differential Privacy and these specific libraries?
+
+P14: Basically none, implementation-wise. I've read about it — our team has been talking about privacy-preserving reporting as a potential project, and I went through a blog post or two. I get the basic concept: you add calibrated noise so you can publish statistics without revealing individual records. But I've never written any DP code, and I haven't touched any of these three libraries before.
+
+Ravi Mahankali: What does your typical development environment look like?
+
+P14: Jupyter notebooks for most things, VS Code when I need something more structured. Pandas is my go-to for anything data-related — filter, groupby, merge, that's basically my whole workflow. I have GitHub Copilot on but I don't always trust it when I'm learning something new.
+
+Ravi Mahankali: Perfect. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon equal to 1.0. Please work through all three libraries in the order shown on your handout, one at a time. The dataset is available as adult.csv in the session directory. Think aloud as you go.
+
+P14: Okay. DiffPrivLib first. Let me open a notebook.
+
+P14: There's an 'income' column with '<=50K' and '>50K'. Easy enough. Now I need the differentially private count of the '>50K' rows. Let me check what DiffPrivLib gives me for counting.
+
+P14: There's a tools module. That looks like the right place.
+
+P14: I see mean, std, var, sum... I don't see a plain count. There's a count_nonzero — let me check that.
+
+P14: It says it's "available but not fully vetted for privacy guarantees." I'm not sure what that means exactly. Let me just try it.
+
+P14: TypeError — "count_nonzero() got an unexpected keyword argument 'epsilon'." Huh. So I can't even pass epsilon. That's the whole point of using a DP library though.
+
+P14: Oh — it says the function is not privacy-vetted so it deliberately doesn't expose epsilon. So it won't let me use it for a DP count at all.
+
+P14: Okay. Let me look for something else. There's a mechanisms module...
+
+P14: There's a Laplace class. It takes epsilon and something called sensitivity. I know epsilon. I don't know what sensitivity is.
+
+P14: Okay, sensitivity is the maximum change one person's data can have on the query output. For a count, adding or removing one person changes the count by one, so sensitivity is one. That makes sense.
+
+P14: Got about 7843. The pandas count is 7841, so that's in the right neighborhood. I think sensitivity equals one for a count is correct, but I figured that out from a quick Google search, not from the library. I'm not completely confident. And this is returning a float — a count being a float is a little odd. But the result looks right.
+
+P14: If this were a real project I'd want someone to review whether this is actually the right way to do it. It feels like I'm going around the library rather than using it the way it was intended.
+
+P14: Average age by education level. In pandas I'd just do df.groupby('education')['age'].mean() and be done in one line. Let me see if DiffPrivLib has something like that.
+
+P14: No groupby. Let me try searching for "group" and see if anything comes up.
+
+P14: Nothing. There's a tools.mean function. Let me look at that.
+
+P14: So it takes an array, epsilon, and a bounds parameter. There's no "by" argument or anything for grouping. I'm going to have to loop over each education level manually.
+
+P14: That's kind of a big gap. GroupBy is the most fundamental thing in data analysis. But okay.
+
+P14: Sixteen education levels. Let me try calling mean without bounds first and see what happens.
+
+P14: There's a warning — "Bounds have not been specified and will be inferred from the data. This will result in additional privacy leakage." So I need to specify bounds. Age range... I'll say 17 to 90. That seems like a safe assumption for working adults without having to check the data directly.
+
+P14: Okay, I've got a mean for each group. 'Bachelors' is around 38, that looks reasonable. But — wait. I just called mean with epsilon=1.0 for each of sixteen groups. Am I spending 1.0 per group? That's a total of sixteen times my budget. That can't be right.
+
+P14: I think I need to split it. 1.0 divided by 16 is 0.0625 per group. Let me redo the loop with that.
+
+P14: Wow, these results are way off. 'Preschool' is showing average age of 190, 'HS-grad' is negative. The noise is completely swamping the signal. With such a tiny epsilon per group, the noise added is just enormous.
+
+P14: So splitting the budget gives me useless results, but not splitting it might be spending the budget wrong. I honestly don't know which is correct. I'll go back to epsilon=1.0 per group and flag this as a question — maybe you only need to split if people can appear in multiple groups?
+
+Ravi Mahankali: Let's move to the next library when you're ready.
+
+P14: Okay, OpenDP. Let me see what this looks like.
+
+P14: "Composable, verified privacy guarantees." There are a lot of different modules. Let me look for a count example.
+
+P14: They're chaining functions with >> operators. You build a pipeline of transformations and then apply a measurement. I've seen this style in scikit-learn but this looks more low-level.
+
+P14: I need column names to set up the pipeline.
+
+P14: Error — "AtomDomain requires type annotations." I don't know what that means. Is it asking me to specify the data type?
+
+P14: I think I need to add TOA=str for string columns. Let me try.
+
+P14: Different error now — "Expected VectorDomain<AtomDomain<str>>, got VectorDomain<AtomDomain<int>>." I'm going in circles with these type errors. They're referencing Rust types — VectorDomain, AtomDomain — which I've never heard of.
+
+P14: Okay, so OpenDP has an explicit type system for data domains. Every transformation specifies what types it accepts and outputs, and if they don't line up exactly the chain won't compile. That makes sense theoretically, but figuring out the right types for my specific case is taking a lot of trial and error.
+
+P14: I think I need to cast the output here. Let me add a cast step.
+
+P14: Okay — got a result. Around 7845. I think that's right. But I honestly can't explain what half of what I just wrote does. I was basically guessing types until the error messages stopped.
+
+Ravi Mahankali: How are you finding OpenDP so far?
+
+P14: It's really hard. I feel like it's built for people who already understand the formal theory. DiffPrivLib felt like a library someone built to be usable by a regular Python P14. This feels like someone took a formally verified system and dropped a Python wrapper on it without thinking about the user experience.
+
+P14: Okay, grouped means. Same problem — I'm pretty sure OpenDP doesn't have groupby either.
+
+P14: Right, nothing. I'll have to do the loop again.
+
+P14: I need to find how to do a mean in OpenDP. The count pipeline used a different chain from the mean, so I need to look this up.
+
+P14: There's a make_resize step involved — it needs an explicit expected size for the input vector. So I need to know how many rows are in each group before I set up the pipeline. But I shouldn't be looking at group sizes without some privacy protection, right? This is getting a bit circular.
+
+P14: Type mismatch again. The chain is expecting l2_distance but somewhere I'm using l1_distance. I need to change the metric.
+
+P14: Got a number for one group. Now I need to do this for sixteen groups. That's going to be a lot of error-chasing.
+
+P14: Some of the smaller groups are failing. I think the resize step has a minimum size it expects and these groups are below it. Let me set a fixed input size and see if that helps.
+
+P14: All sixteen groups have values now. I used epsilon=1.0 per group, same as I did in DiffPrivLib. The results look noisy but they're roughly in the right range. This took a really long time. I would not want to use OpenDP on a deadline.
+
+P14: Okay, last one. Please be more approachable than OpenDP.
+
+P14: There's a Count class. An actual Count class that takes epsilon. This is exactly what I was looking for at the beginning with DiffPrivLib.
+
+P14: 7838. And it came back as an integer — a count that's an actual integer. That just worked on the first try. Why is this so much easier?
+
+P14: I still had to pre-filter the data myself before handing it to the library, but the function call itself is simple and obvious.
+
+P14: GroupBy... I already know the answer but let me check.
+
+P14: Yeah, nothing. Three libraries, zero built-in groupby. I don't understand why that feature is absent from all of them — it's like the most common operation in any kind of data analysis.
+
+P14: Before writing the manual loop, I asked ChatGPT: "How to do a differentially private groupby mean in pandas?"
+
+P14: ChatGPT gave me custom Python code using NumPy: `df.groupby('education')['age'].apply(lambda x: x.mean() + np.random.laplace(0, 1/len(x)))`. Wait a minute! ChatGPT's custom code doesn't clip the values to bounds at all! It just takes the raw pandas mean and adds noise. That completely violates global sensitivity requirements because unclipped ages could have huge sensitivity if there's an outlier! ChatGPT generated a custom DP script that claims to be differentially private, but is actually mathematically insecure.
+
+P14: So I can't trust LLM-generated custom noise functions. I have to use PyDP's `BoundedMean` class inside a manual loop instead.
+
+P14: BoundedMean takes lower_bound and upper_bound in the constructor. That's clean.
+
+P14: I went back to splitting the epsilon this time. The values are noisier but at least I'm more confident about the budget. Some groups have pretty wide swings from what I'd expect, but they're not absurd like they were before.
+
+P14: The API itself is really clear though. Bounds go in the constructor, quick_result gives you the answer. If PyDP had been my first library today instead of my third, I think the whole session would have gone differently.
+
+Ravi Mahankali: Now that you've finished all three libraries, I'd like to ask a few follow-up questions. Starting with Task A in DiffPrivLib — you ended up using the Laplace mechanism directly rather than a built-in count function. How did you feel about that approach?
+
+P14: Uncertain. I Googled what sensitivity means, figured it should be one for a count, and the result looked plausible. But I wasn't confident it was the right way to do it. It felt like a workaround. If I were using this in a real pipeline I'd want someone with more DP background to sign off on it.
+
+Ravi Mahankali: For Task B, all three libraries required manually looping over education levels. What did you think of that?
+
+P14: That was the biggest surprise. GroupBy is the most fundamental operation in data analysis — honestly it's most of what I do every day. In pandas, Spark, SQL, you can group and aggregate in one line. None of these three libraries support it natively. On top of that, the budget question gets really complicated when you're splitting across sixteen groups. I still don't know for certain whether I handled the budget correctly. That's a pretty significant gap for tools that are supposed to make data work private.
+
+Ravi Mahankali: On the epsilon parameter — you used 1.0 for Task A and experimented across Task B. How did you choose those values?
+
+P14: The task said use 1.0, so I used 1.0. [laughs] I genuinely don't have a good intuition for what epsilon should be in practice. I know smaller means more privacy and less noise means bigger epsilon — but what does 1.0 actually mean in terms of risk? I couldn't tell you. I just used what was specified and didn't think too hard about it.
+
+Ravi Mahankali: Which library did you find most usable overall?
+
+P14: PyDP first, then DiffPrivLib, then OpenDP way down at the bottom. PyDP has Count, BoundedMean — the function names match what I'm trying to do. DiffPrivLib was okay but I had to work around it for the basic count case. OpenDP felt like it was designed for someone with a formal background in type systems and privacy theory. I was just trying to count rows and I ended up fighting with VectorDomain and AtomDomain and Rust types I've never seen before.
+
+Ravi Mahankali: Any final thoughts?
+
+P14: I think there's a real use case for tools like this, but none of them are ready for someone like me to just pick up and use safely. The things I struggled with most — what sensitivity to set, what epsilon means, whether to split the budget — are exactly the things the libraries don't help you with. It would be easy to think you've implemented something correctly when you've actually made a subtle mistake. I wouldn't feel confident deploying any of this without a lot more guidance.
+
+Ravi Mahankali: Thank you, P14. That's really helpful feedback.

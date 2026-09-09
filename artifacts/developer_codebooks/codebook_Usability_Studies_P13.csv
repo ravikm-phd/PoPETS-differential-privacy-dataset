@@ -1,0 +1,36 @@
+Code,Developer comments,Context of the comments,How the code is related to the comment
+ProductionReadiness,"Version 0.6.6... That's a zero-major version. In my world that means not production ready or API may break at any time",Initial Assessment - 00:05,Pre-1.0 version concerns
+ProductionReadiness,In healthcare I can't just YOLO a library into production,Initial Assessment - 00:05,Risk-averse production environment
+ComplianceCertification,I'm not seeing any security audit reports. No compliance certifications. No commercial support offerings,Initial Assessment - 00:05,Missing compliance documentation
+ComplianceCertification,Security audit: Third-party verification that the library correctly implements DP guarantees,Initial Assessment - 00:05,Need for external validation
+ComplianceCertification,Compliance documentation: Clear guidance on how to use it in HIPAA-compliant GDPR-compliant ways,Initial Assessment - 00:05,Regulatory requirements
+ComplianceCertification,Formal verification: Mathematical proof that the implementation matches the theory,Initial Assessment - 00:05,Need for correctness guarantees
+ComplianceCertification,Commercial support: Someone I can call when things break in production,Initial Assessment - 00:05,Need for support infrastructure
+ComplianceCertification,Insurance/liability: Who's responsible if a privacy breach occurs due to a library bug?,Initial Assessment - 00:05,Liability concerns
+AuditTrail,How do I prove to auditors that this count was computed with epsilon=1.0? There's no logging no audit trail no way to trace what privacy budget was consumed,Task 1 - IBM DiffPrivLib - 00:20,Missing audit capabilities
+AuditTrail,"In production I need: Automatic logging of all DP operations Privacy budget tracking across queries Audit trail for compliance Ability to prove to regulators what privacy level was used",Task 1 - IBM DiffPrivLib - 00:20,Production audit requirements
+PrivacyBudgetManagement,What prevents me from accidentally calling this multiple times and consuming more budget than intended?,Task 1 - IBM DiffPrivLib - 00:20,No budget safeguards
+PrivacyBudgetManagement,I just consumed 3x the privacy budget I intended. In production this is a privacy violation. But the library has no safeguards,Task 1 - IBM DiffPrivLib - 00:20,Budget overrun risk
+PrivacyBudgetManagement,"I need: Automatic budget tracking Warnings or errors when budget is exhausted Centralized budget management Ability to set hard limits",Task 1 - IBM DiffPrivLib - 00:20,Budget management features needed
+VerificationNeeds,How do I know this implementation is correct? How do I verify that epsilon=1.0 actually provides 1.0-differential privacy?,Task 1 - IBM DiffPrivLib - 00:20,Cannot verify correctness
+VerificationNeeds,"In healthcare if I claim data is private and it's not I'm liable. I need: Test vectors I can run to verify correctness Formal verification Third-party audit reports",Task 1 - IBM DiffPrivLib - 00:20,Legal liability concerns
+FormalVerification,OpenDP has this concept of formally verified privacy guarantees. The library tracks privacy parameters through the pipeline,Task 1 - OpenDP - 00:45,Positive feature in OpenDP
+FormalVerification,OpenDP can tell me the privacy cost. That's a step in the right direction for compliance,Task 1 - OpenDP - 00:45,Privacy cost transparency
+ComplianceGap,The privacy guarantees are computed but they're not logged anywhere. When an auditor asks prove that you used epsilon=1.0 on March 15th I have no evidence,Task 1 - OpenDP - 00:45,No persistent evidence
+ComplianceGap,"There's no official compliance certification. When I present this to legal/compliance they'll ask: Is this HIPAA-certified? Is it GDPR-compliant?",Task 1 - OpenDP - 00:45,Legal team requirements
+ComplianceGap,I can't say well it's mathematically sound. They need official certifications audit reports legal opinions,Task 1 - OpenDP - 00:45,Gap between math and regulation
+ComplianceGap,There's a gap between mathematical privacy and regulatory privacy. Differential privacy is mathematically well-defined but compliance is about paperwork audits and legal frameworks,Task 1 - OpenDP - 00:45,Math vs legal requirements
+CompositionTracking,I'm manually dividing epsilon by the number of groups. But in production: What if the number of groups changes? What if I query multiple times?,Task 2 - IBM DiffPrivLib - 01:10,Manual composition is error-prone
+CompositionTracking,I need automatic composition tracking,Task 2 - IBM DiffPrivLib - 01:10,Need for automated tracking
+DataValidation,"bounds=(0 100). How do I verify that all ages are actually within these bounds? If there's an age of 150 due to data corruption the privacy guarantee might be violated",Task 2 - IBM DiffPrivLib - 01:10,No data validation
+DataValidation,"In production I need: Automatic data validation against stated bounds Errors if data violates assumptions Warnings if data is suspicious Sanitization of invalid values",Task 2 - IBM DiffPrivLib - 01:10,Validation features needed
+MonitoringNeeds,"When this runs in production I need monitoring: How many DP queries are being run? What's the average privacy budget consumed? Are there anomalies?",Task 2 - IBM DiffPrivLib - 01:10,Observability requirements
+MonitoringNeeds,None of these libraries integrate with standard monitoring tools like Prometheus DataDog etc,Task 2 - IBM DiffPrivLib - 01:10,No monitoring integration
+ProductionInfrastructure,"I'd need to build substantial infrastructure around it: Logging layer Budget management system Data validation Monitoring and alerting Audit trail storage Compliance documentation",Production Deployment - 01:35,Extensive wrapper needed
+ProductionInfrastructure,That's person-months of work. For a small team that's prohibitive,Production Deployment - 01:35,High deployment cost
+EnterpriseFeatures,Enterprise-Grade Library needs: Semantic versioning LTS releases Comprehensive test suite Performance benchmarks Clear deprecation policies,Production Deployment - 01:35,Maturity requirements
+EnterpriseFeatures,"Compliance Features: HIPAA compliance documentation GDPR compliance guidance SOC 2 audit reports Penetration testing results Formal verification certificates",Production Deployment - 01:35,Compliance infrastructure needed
+EnterpriseFeatures,"Commercial Support: Paid support tiers SLAs for bug fixes Dedicated account managers Training and consulting Legal indemnification",Production Deployment - 01:35,Support infrastructure needed
+LegalReview,"When I present this to legal/compliance: Has this been security audited? No. Is it HIPAA-certified? No. Do we have liability coverage? No. Result: Legal says no",Final Reflection - 01:55,Legal barriers to adoption
+SecurityReview,"Security Review: Is there an audit trail? No. Can we monitor privacy budget? No. Are there safeguards against misuse? No. Result: Security says no",Final Reflection - 01:55,Security barriers to adoption
+RegulatoryBarrier,This isn't a criticism of the libraries themselves. But production deployment especially in regulated industries requires a whole ecosystem of features that don't exist,Final Reflection - 01:55,Gap between library and production

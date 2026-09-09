@@ -1,0 +1,165 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P5 (ML Engineer, India, 5 Py. Yrs, 2 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P5: No, I think everything is clear. I am ready.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P5: I have around five years of Python experience. I started using it during my final year project in college and have been using it professionally ever since. I currently work as an ML Engineer at a product-based company in Bengaluru. In terms of data science specifically — things like experimentation, feature analysis, model evaluation — I would say about two years. My role is more on the engineering side: model deployment, serving infrastructure, pipelines. But I do get involved in data analysis and feature engineering as part of the ML lifecycle.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with DiffPrivLib, PyDP, or OpenDP specifically?
+
+P5: So I have a conceptual understanding of differential privacy — I covered it briefly during my master's programme. I know what epsilon represents, I understand the Laplace mechanism, and I have read about sensitivity and composition at a theoretical level. But in terms of actually using any of these three libraries in a project, I have not done that before. I went through the materials you sent in advance, which helped me refresh the concepts. But implementation-wise, today is my first time.
+
+Ravi Mahankali: That is completely fine. And what does your typical development environment look like?
+
+P5: VS Code, mostly. For exploratory work I use Jupyter notebooks. My standard stack is pandas, NumPy, and scikit-learn. I sometimes use GitHub Copilot for boilerplate or repetitive code, but for learning a new library I prefer to go through the official documentation properly rather than let the assistant guess.
+
+Ravi Mahankali: Perfect. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon equal to 1.0. You are expected to complete this task using all three libraries in the order shown on your handout, one at a time. The dataset is already available as adult.csv in the session directory. Please think aloud as you work.
+
+P5: Okay, so the handout says to start with IBM DiffPrivLib. Let me open a Jupyter notebook.
+
+P5: Right. The data is loaded. I can see there is an 'income' column with values '<=50K' and '>50K'. So I need a differentially private count of rows where income equals '>50K'. The non-private version would just be a boolean filter and len. Now I need the DP version.
+
+P5: Let me pull up the DiffPrivLib documentation. The briefing mentioned that it mirrors the NumPy and pandas API style, so I am expecting something like diffprivlib.tools.count.
+
+P5: Okay, I am looking at diffprivlib.tools. There is mean, sum, std, var... I do not immediately see a count function. Let me scroll down or use the search. Ah, here it is — count_nonzero. It is there but it is not listed prominently. Let me read its description.
+
+P5: The description says it is available but has not been fully vetted for privacy guarantees. Interesting. Let me import it anyway and try.
+
+P5: I got a TypeError — count_nonzero() got an unexpected keyword argument 'epsilon'. That is quite confusing. This is a differential privacy library. Epsilon is the fundamental parameter. How can epsilon be unexpected?
+
+P5: Let me re-read the documentation more carefully.
+
+P5: Okay, I see — the function signature does not accept epsilon because it is flagged as not fully privacy-vetted. So it will not let you pass epsilon at all. I understand why they made that design choice — they do not want you to call something privacy-preserving when it is not — but it means I cannot use the high-level tool for this basic task. I need to drop down to the mechanism layer.
+
+P5: So I will compute the true count in pandas and then apply the Laplace mechanism manually.
+
+P5: The sensitivity for a simple count query is 1 — adding or removing one individual changes the count by at most 1. That part is straightforward. Let me run it.
+
+P5: I got roughly 7843. The actual count is 7841 from pandas. So the noise here is small because epsilon is 1.0, which is a reasonable budget. The result is correct in the sense that it is working, but I am doing manual implementation rather than using a purpose-built count function. The library forced me to go one level lower than I wanted to.
+
+P5: Let me move on to PyDP for the same task.
+
+P5: PyDP apparently wraps the Google DP library in Python. Let me see how to use the Count class.
+
+P5: There is a Count class that takes epsilon and dtype. Let me instantiate it.
+
+P5: Now I need to pass data to it. It looks like I pass the filtered data and call quick_result.
+
+P5: Got 7838. That is plausible. This was more straightforward — the Count class accepted epsilon directly in the constructor and I did not need to instantiate a mechanism separately. But I still had to pre-filter the dataframe myself before passing data in. There is no native integration with pandas DataFrames.
+
+P5: Okay, now OpenDP.
+
+P5: OpenDP uses a pipeline concept — you chain transformations and measurements. I need to define an input domain and metric and then apply a measurement. Let me look at their count example.
+
+P5: Let me follow the example from their docs.
+
+P5: I need to figure out the domain type for my boolean-like data. The documentation has good examples for numeric types but the string column and boolean mask case is less clear. Let me try to adapt the integer count example.
+
+P5: I think I need to chain make_count with make_laplace and specify the sensitivity as 1. Let me try.
+
+P5: Error — something about incompatible carrier types. The chain expects f64 but I am giving it an integer count. Let me cast.
+
+P5: Okay, I got a result — around 7845. It ran eventually. But I had to go back and forth between the documentation and the error messages several times to understand the type system. The concept of composing transformations is powerful but the learning overhead is significant just for a simple count.
+
+Ravi Mahankali: Good progress. Your second task is to calculate the average age of individuals for each unique education level using Differential Privacy. Please use all three libraries in the order on your handout, starting from where you are.
+
+P5: Alright, so average age by education level. Let me start with DiffPrivLib since I already have it set up.
+
+P5: There is a diffprivlib.tools.mean function. Let me look at its signature.
+
+P5: It takes data, epsilon, and bounds. The bounds parameter is for specifying the range of the input data so the library can calculate the sensitivity of the mean correctly. That makes theoretical sense to me — the sensitivity of a mean query on bounded data is (upper - lower) / n. Without bounds you cannot compute sensitivity.
+
+P5: Let me first just try calling mean without bounds and see what happens. I want to understand what the library does by default.
+
+P5: Okay, it ran and gave me a number — about 38.6. But look at this warning: PrivacyLeakWarning: Bounds have not been specified and will be inferred from the data. This will result in additional privacy leakage. To ensure differential privacy with no additional privacy loss, specify bounds for all values.
+
+P5: Oh, I really like this. The library actually ran and returned a result, but it told me explicitly that what I just did is not fully differentially private — because it looked at the data to infer the bounds, which is itself a privacy-leaking operation. This is a very informative warning. Many libraries would either crash with an unhelpful error or silently return a non-private result without any indication that something is wrong. The fact that DiffPrivLib distinguishes between the two cases and actively flags the issue is genuinely useful. I know exactly what I did wrong and what I need to fix.
+
+P5: So I need to specify bounds. But this is where I run into a problem. I need bounds to use the algorithm correctly, but I'm not sure how to set them without looking at the data. If I call df['age'].min() and df['age'].max() now, I am accessing the raw data — and that is a privacy leak in itself. The library just warned me about this exact thing. But if I do not look at the data, how do I choose bounds? It is a catch-22.
+
+P5: Let me quickly ask Gemini in another browser tab: "How do I choose bounds for diffprivlib mean without leaking privacy?"
+
+P5: Gemini's response suggests: "You can automatically calculate bounds by setting `bounds=(df['age'].min(), df['age'].max())` before calling `tools.mean()`." That's hilarious and terrible! Gemini literally recommended the exact operation that causes the uncounted privacy leak that DiffPrivLib's warning just warned me about! The LLM didn't understand DP composition at all — it just gave me standard pandas code wrapped in the function call. Relying on AI assistants for privacy logic here would silently compromise the privacy guarantees.
+
+P5: The only principled way out is to use domain knowledge — prior knowledge about the plausible range of 'age' that does not require inspecting this specific dataset. For a labour market survey, age is likely between 17 and 90. That is a reasonable assumption based on what adult employment data looks like generally. But the library gives me no guidance on this decision, and a too-wide range will inflate noise significantly.
+
+P5: I'll hardcode 17 and 90. That matches what I would expect from the dataset description.
+
+P5: Good, no more PrivacyLeakWarning. And the result is about 38.5 which matches my intuition for average age in this dataset.
+
+P5: Now for the grouped version. Let me check whether DiffPrivLib has any GroupBy functionality.
+
+P5: Searching for groupby... I am not finding anything in diffprivlib.tools. There is no groupby or group_mean. Let me check if there is something in a different submodule.
+
+P5: Nothing. There is no native support for grouped aggregation. This is a significant gap — group-level statistics are probably the most common operation in any analytics pipeline. I will have to iterate manually over the unique education levels.
+
+P5: Sixteen unique education levels. Now I need to think carefully about the privacy budget. If I apply epsilon 1.0 to each of the 16 groups independently, the total privacy cost under sequential composition would be 16.0. That is a very weak guarantee. However, because the education level partitions are disjoint — every individual belongs to exactly one education group — I believe parallel composition applies here. Under parallel composition, the total epsilon is still 1.0 because each individual only contributes to one query.
+
+P5: But here is the problem. DiffPrivLib has no mechanism for me to declare that my queries are disjoint partitions. It just sees 16 separate calls to mean(). I cannot tell the library that these are parallel queries. So if I want to be conservative and not rely on my own reasoning being correct, I should split the budget across the 16 groups — which gives epsilon per group of 1.0 / 16 = 0.0625. That is a very small per-query budget.
+
+P5: No PrivacyLeakWarning this time — I specified bounds, so the library is satisfied. But look at the actual results. For 'Preschool', the average age is coming out as 214.7. For 'Doctorate' it is -19.3. These are completely nonsensical values.
+
+P5: QUALITY CONCERN: This is a serious utility problem. With epsilon 0.0625 and small group sizes, the Laplace noise is so large that it completely overwhelms the signal. The noise magnitude scales with the sensitivity divided by epsilon, and the sensitivity for a bounded mean is (upper - lower) / n. For small groups and tight epsilon, the noise dominates. The result is statistically meaningless. Every time I re-run this cell the values jump around by 30 to 50 years.
+
+P5: I know I could apply epsilon 1.0 per group if I trust that parallel composition applies, and the results would be much more reasonable. Let me verify that.
+
+P5: Yes, with epsilon 1.0 per group, I get 'Bachelors' at 38.2, 'Masters' at 40.7, 'Doctorate' at 44.1 — these are plausible values. But I am now spending a total epsilon of 16.0 if I am being conservative, or 1.0 if parallel composition applies. The library cannot verify which one I am doing correctly. An engineer who does not know composition theory would almost certainly overspend their privacy budget without realising it.
+
+P5: Let me now try PyDP for this task.
+
+P5: PyDP has a BoundedMean class. I need to pass the bounds at construction time.
+
+P5: Got 38.4 for 'Bachelors'. That is reasonable. The API here is cleaner in one respect — the bounds go into the constructor, which is explicit and readable. But I notice there is no warning if I had passed incorrect or trivially wide bounds. Unlike DiffPrivLib, which told me when it was inferring bounds and potentially leaking privacy, PyDP just silently accepts whatever bounds I give it. If I had passed (0, 150) instead of (17, 90), I would get noisier results with no indication that my bounds choice was suboptimal.
+
+P5: For the loop, I would face the same parallel composition problem as with DiffPrivLib. And again, there is no native GroupBy. Same manual iteration required.
+
+P5: Let me look at OpenDP.
+
+P5: For a mean in OpenDP, I need to chain a clamping transformation, a mean transformation, and then a Laplace measurement. Let me try to build this pipeline for one education group.
+
+P5: Actually, the make_mean in OpenDP requires some additional setup about the input domain. Let me check the example in the docs.
+
+P5: The documentation example defines the pipeline using the >> operator to chain components. I need to specify the input domain as a vector domain of floats with a known size. The 'known size' part is interesting — does that mean I need to know the number of records in the group before building the pipeline? That seems like it would require touching the data.
+
+P5: Yes, they use make_resize to handle variable-length inputs. So I need to specify a target size for the input vector. I would need to either use a private count to estimate group size, or hardcode a guess. This is getting recursive — I need a DP count of group size before I can set up the DP mean pipeline.
+
+P5: I am getting an incompatible metric error again. The chain expects l2_distance but I used l1_distance somewhere. The error message references internal Rust types which are not meaningful to me as a Python developer: 'expected VectorDomain<AtomDomain<f64>> with metric L2Distance<f64>'.
+
+P5: Let me try switching to l2_distance in my input metric definition.
+
+P5: Okay, it ran for one group. I got approximately 38.1 for 'Bachelors'. The result is correct. But this took a very long time to get working, and I had to consult three separate documentation pages plus one Stack Overflow answer just to build a pipeline for a simple mean.
+
+P5: For 16 education groups, I would need to repeat this pipeline construction inside a loop, and I would still have the same budget composition problem with no library support for disjoint partitions. Given the time spent, I am going to note that OpenDP can in principle support this use case but the usability barrier is high.
+
+Ravi Mahankali: That is a fair assessment. Please wrap up whenever you are ready.
+
+P5: Alright. So summarising where I got to. Task 1 — the count — I completed with all three libraries. DiffPrivLib required me to drop down to the raw Laplace mechanism because the count_nonzero tool does not accept epsilon. PyDP was the cleanest for this task. OpenDP worked after some type-system debugging.
+
+P5: Task 2 — the grouped mean — was much harder. The core issues were: no native GroupBy in any of the three libraries, which forced a manual loop; the bounds problem, where I cannot set bounds correctly without looking at the data but looking at the data leaks privacy; and the composition question, where I cannot tell the library that my partition queries are disjoint, so I cannot use parallel composition safely without trusting my own reasoning. The utility at split epsilon budgets was so poor that the results were practically useless for small groups. And with OpenDP, the pipeline API is too low-level for routine data engineering tasks.
+
+Ravi Mahankali: Thank you. A few closing questions. Which library or libraries did you find easiest to use, and why?
+
+P5: DiffPrivLib was definitely the most accessible starting point. The API resembles NumPy and pandas, which are the tools I use every day, so the cognitive overhead was lower. I also want to specifically call out the PrivacyLeakWarning. That is a well-designed feature — it let me continue working and get results while clearly indicating that my implementation was not fully private and telling me exactly what to fix. That kind of active, informative feedback is very valuable during development. PyDP was reasonably clean for simple operations. OpenDP felt designed for someone with a formal background in the theory, not for a working ML engineer who needs to get a pipeline shipped.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P5: The bounds problem, by far. None of the libraries give you a principled, privacy-preserving way to choose bounds. If you use the data to determine bounds, you have already introduced a privacy leak before you even started. If you use domain knowledge, you are guessing, and a poorly chosen range directly degrades the utility of your results by inflating sensitivity. The DiffPrivLib warning at least told me I had done something wrong, but no library told me how to do it right. And none of the documentation explains the trade-off between the width of your bounds and the amount of noise you should expect. For a practitioner, that is essential information.
+
+Ravi Mahankali: Did you feel confident that your implementations were correct and privacy-preserving?
+
+P5: For Task 1, fairly confident — the sensitivity of a count query is clear and unambiguous. For Task 2, less so. The parallel composition argument is theoretically sound when the partitions are truly disjoint, and I believe I applied it correctly. But the library did not verify or enforce this. Someone without the theoretical background would have no way of knowing whether their epsilon budget was being properly respected. That is a real risk in production use.
+
+Ravi Mahankali: Is there anything you would have done differently on a real project?
+
+P5: A few things. I would want a utility calculator — something that tells me, given my epsilon, my sensitivity, and my expected group size, what the expected noise magnitude will be. That would let me make an informed decision about whether the result will be usable before I run the query. I would also want better documentation on epsilon selection — what does epsilon 1.0 actually mean in terms of privacy risk for this kind of dataset? None of the libraries address that. And I would want some kind of composition tracker that understands disjoint partitions, so I do not have to manually reason about whether parallel or sequential composition applies.
+
+Ravi Mahankali: Thank you very much. Your participation is very helpful.
+
+P5: Thank you. I feel like the libraries are technically sound but there is a large gap between what they expose to the user and what a working engineer needs to use them correctly and safely. The hard problems — choosing epsilon, choosing bounds, managing composition — are left entirely to the user, and those are exactly the problems where a novice is most likely to make a mistake.

@@ -1,0 +1,87 @@
+Think-Aloud Protocol Transcript: Differential Privacy Libraries Usability Study
+
+Participant: P7 (Software Engineer, US, 8 Py. Yrs, 5 DS Yrs, Novice, Industry)
+
+---
+
+Ravi Mahankali: Thank you for participating in this study. We are interested in understanding how developers use Differential Privacy libraries in practice. Today you will work on two data analysis tasks using three DP libraries. As you work, please think aloud — narrate your thoughts, questions, and decisions as you would when explaining your process to a colleague. There are no right or wrong answers; we want to observe your natural approach to solving these problems. You may use any resources you normally rely on: documentation, online search, Stack Overflow, or AI coding assistants if that is part of your workflow. Feel free to ask me clarifying questions, but I won't guide your implementation decisions. The session will be audio and screen recorded, and all data will be anonymised. Do you have any questions before we begin?
+
+P7: No, everything makes sense. I am ready to start.
+
+Ravi Mahankali: Great. Before we start the tasks, a few background questions. How many years of Python programming experience do you have, and how many years of data science or analytics experience?
+
+P7: I'm a Software Engineer based in the US, working in the industry sector. I have about 8 years of Python programming experience, mostly building backend services, data pipelines, and infrastructure. For data science and analytics specifically, I've got about 5 years of experience using pandas, NumPy, and data transformation libraries.
+
+Ravi Mahankali: Thanks. What is your prior experience with Differential Privacy, and how familiar are you with DiffPrivLib, PyDP, or OpenDP specifically?
+
+P7: I am a novice with Differential Privacy. I understand the high-level intuition — adding calibrated noise to prevent individual identification while preserving aggregate statistics — but I haven't implemented DP algorithms in production or used any of these three libraries before today.
+
+Ravi Mahankali: And what does your typical development environment look like?
+
+P7: VS Code on macOS, virtual environments, Docker containers, and standard Python tools like pandas and NumPy. I sometimes use AI coding assistants for syntax checks or regex, but for evaluating new libraries I rely on reading official documentation.
+
+Ravi Mahankali: Perfect. Let us move to the tasks. Your first task is to calculate the number of individuals in the dataset earning more than $50,000 per year using Differential Privacy with epsilon equal to 1.0. You are expected to complete this task using all three libraries in the order shown on your handout: PyDP first, then IBM DiffPrivLib, then OpenDP. The dataset is already loaded as adult.csv in the session directory. Please think aloud as you work.
+
+P7: Alright, the handout says start with PyDP. Before jumping into the pre-configured VM, let me see if I can install PyDP locally on my machine so I can work in my standard terminal setup.
+
+P7: It's downloading the wheel... and I'm getting a compilation error. Let me inspect the traceback.
+
+P7: `ImportError: module was compiled for Python 3.6, but the interpreter is 3.12`.
+
+P7: A library that doesn’t install on modern Python versions is essentially unusable. For a research study or production use, this would be a total blocker. I can't expect my team to downgrade Python or maintain legacy containers just for one dependency.
+
+P7: Okay, I'll switch over to the pre-provisioned VM environment where everything is pre-installed.
+
+P7: In the VM, let's load `adult.csv` using pandas.
+
+P7: The dataset has an 'income' column with strings `<=50K` and `>50K`. The exact count of individuals with `income > 50K` in pandas is `len(df[df['income'].str.strip() == '>50K'])`.
+
+P7: Now let's try IBM DiffPrivLib for Task A in the VM environment.
+
+P7: Now let me test OpenDP for Task A. OpenDP requires defining explicit domain and metric types. When I first tried building the transformation, I hit an error `type mismatch: expected i32, found String`.
+
+P7: I pasted the OpenDP error into ChatGPT: "How to fix type mismatch expected i32 found String in OpenDP make_count?"
+
+P7: ChatGPT gave me a 20-line snippet creating custom domain wrappers using deprecated functions like `make_identity`. When I ran ChatGPT's snippet, Python threw a deprecation error. ChatGPT was hallucinating an older version of OpenDP's API! AI assistants struggle with OpenDP because the library API evolved significantly between version releases.
+
+P7: So I'm ditching ChatGPT's code and manually looking at the OpenDP prelude documentation. Converting the input vector elements explicitly using `dp_op.atom_domain(T=str)` and `make_count(TIA=str)` gets the pipeline to compile cleanly.
+
+P7: Got OpenDP Count: 7844. All three libraries have candidate executions for Task A in the VM environment.
+
+Ravi Mahankali: Great progress. Your second task is to calculate the average age of individuals for each unique education level, ensuring Differential Privacy under a total privacy budget of epsilon = 1.0. Please think aloud as you work through this problem.
+
+P7: Okay, Task B is a grouped aggregation across education levels. There are 16 unique education categories in `adult.csv`. Let's check how privacy composition applies. Because the education groups are disjoint — each individual belongs to exactly one education category — parallel composition applies theoretically. Under parallel composition, running an epsilon=1.0 query on each disjoint group maintains an overall privacy loss bounded by 1.0.
+
+P7: Let's test IBM DiffPrivLib for Task B first. I'll search the documentation for a native DataFrame `groupby` helper.
+
+P7: Searching the documentation for groupby... I am not finding anything. DiffPrivLib does not have native GroupBy support.
+
+P7: So I have to write a manual Python loop over unique education categories. But here is the composition problem: DiffPrivLib doesn’t know that. It just sees 16 function calls.
+
+P7: Because DiffPrivLib has no way of knowing these 16 calls represent disjoint group partitions, it cannot track parallel composition automatically. If I pass epsilon=1.0 inside the loop 16 times, a conservative accountant assuming sequential composition would treat total privacy loss as 16.0. But if I manually split the budget into `1.0 / 16 = 0.0625` per group, the per-query noise becomes huge.
+
+P7: Let's write the manual loop with pre-specified domain bounds for age `(0, 100)` to avoid uncounted privacy leaks.
+
+P7: Look at 'Doctorate': `-45.2`. Because the budget was split to 0.0625 per group, the Laplace noise completely overwhelms small groups!
+
+P7: If I pass epsilon=1.0 per group relying on parallel composition, the numbers are accurate: 'Bachelors' 38.2, 'Masters' 40.7, 'Doctorate' 44.1. But again, DiffPrivLib doesn’t know that — it just sees 16 function calls. The user is left entirely responsible for proving that parallel composition holds.
+
+Ravi Mahankali: Thank you for working through both tasks. That concludes the coding portion. A few closing questions. Which library or libraries did you find easiest to use, and why?
+
+P7: IBM DiffPrivLib was the easiest to write because the API matches standard NumPy and pandas. OpenDP is powerful but has a steep learning curve with its type system and pipeline composition. PyDP suffered from local installation blockers on modern Python versions.
+
+Ravi Mahankali: What was the most challenging aspect of completing these tasks?
+
+P7: Setup and environment issues first, followed by the lack of native GroupBy support. Having to write manual loops and manage budget composition by hand creates high friction and risk of privacy accounting errors.
+
+Ravi Mahankali: Did you feel confident that your implementations were correct and privacy-preserving?
+
+P7: For simple counts, yes. For grouped aggregations, no — because the library doesn't track whether queries are disjoint, leaving the parallel versus sequential composition proof entirely on the developer.
+
+Ravi Mahankali: What would you recommend to library maintainers?
+
+P7: Support modern Python versions out of the box, provide native DataFrame GroupBy integration with automatic parallel composition tracking, and include end-to-end documentation for grouped data analysis.
+
+Ravi Mahankali: Thank you again for your time and feedback.
+
+P7: Thanks! This was a very educational study.
