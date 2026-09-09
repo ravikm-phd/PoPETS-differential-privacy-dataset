@@ -36,8 +36,7 @@ The repository contains the complete open research dataset, study protocol, task
 4. **Workaround Taxonomy Mapping (`artifacts/workaround_mapping.md`):** Mapping of 412 workaround instances across 5 workaround strategies to specific library-side design triggers and DP-specific safety failure modes.
 5. **Participant Demographics Dataset (`artifacts/participant_demographics.csv`):** Complete demographic breakdown ($n=22$) detailing Python experience, Data Science experience, DP experience tier (Novice, Intermediate, Experienced), primary role, region, and sector context.
 6. **Study Protocol (`artifacts/study_protocol.md`):** Full 8-stage study protocol, task briefings (Task A and Task B), participant info sheet, consent form, and server environment setup documentation.
-7. **Benchmark Dataset (`artifacts/adult.csv`):** Pre-processed UCI Adult dataset used by participants for all think-aloud tasks.
-
+7. 
 ---
 
 ### Security/Privacy Issues and Ethical Concerns
