@@ -61,7 +61,8 @@ This artifact presents no security, system, or machine risks. It does not execut
 
 ### Accessibility
 
-The artifact repository is publicly accessible via Zenodo under a persistent DOI URL:
+The artifact repository is publicly accessible via Github and Zenodo under a persistent URLs:
+- **Github:** [https://github.com/ravikm-phd/PoPETS-differential-privacy-dataset](https://github.com/ravikm-phd/PoPETS-differential-privacy-dataset)
 - **Zenodo DOI:** [https://doi.org/10.5281/zenodo.22552503](https://doi.org/10.5281/zenodo.22552503)
 - **License:** All research data and documentation artifacts in this repository are released under the [Creative Commons Attribution 4.0 International License (CC-BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
 
